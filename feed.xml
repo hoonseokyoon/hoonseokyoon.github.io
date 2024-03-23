@@ -1,4 +1,40 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="https://hoonseokyoon.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://hoonseokyoon.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2024-03-21T03:50:27+00:00</updated><id>https://hoonseokyoon.github.io/feed.xml</id><title type="html">Hoonseok Yoon</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design. </subtitle><entry><title type="html">a post with code diff</title><link href="https://hoonseokyoon.github.io/blog/2024/code-diff/" rel="alternate" type="text/html" title="a post with code diff"/><published>2024-01-27T19:22:00+00:00</published><updated>2024-01-27T19:22:00+00:00</updated><id>https://hoonseokyoon.github.io/blog/2024/code-diff</id><content type="html" xml:base="https://hoonseokyoon.github.io/blog/2024/code-diff/"><![CDATA[<p>You can display diff code by using the regular markdown syntax:</p> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">```</span><span class="nl">diff
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="https://hoonseokyoon.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://hoonseokyoon.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2024-03-23T08:07:41+00:00</updated><id>https://hoonseokyoon.github.io/feed.xml</id><title type="html">Hoonseok Yoon</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design. </subtitle><entry><title type="html">Integrated Understanding of Calculus Symbols</title><link href="https://hoonseokyoon.github.io/blog/2024/Integrated-Understanding-of-Calculus-Symbols/" rel="alternate" type="text/html" title="Integrated Understanding of Calculus Symbols"/><published>2024-03-23T08:00:00+00:00</published><updated>2024-03-23T08:00:00+00:00</updated><id>https://hoonseokyoon.github.io/blog/2024/Integrated%20Understanding%20of%20Calculus%20Symbols</id><content type="html" xml:base="https://hoonseokyoon.github.io/blog/2024/Integrated-Understanding-of-Calculus-Symbols/"><![CDATA[<h1 id="integrated-understanding-of-calculus-symbols">Integrated Understanding of Calculus Symbols</h1> <h3 id="version">Version</h3> <ul> <li>2024.03.23. Version 0.1</li> </ul> <p><em>Written for personal understanding, it may lack some mathematical rigor.</em></p> <hr/> <h3 id="differentiation-of-vector-functions-and-tensor-functions">Differentiation of vector functions and tensor functions</h3> <h5 id="preview">Preview</h5> <ol> <li>Dependent Variable vs Independent Variable in Function <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> When observing a function in isolation
+ independent variable := input values
+ dependent variable := output values 
+</code></pre></div> </div> <p>\(\frac{d}{dt}F(t, q(t), q'(t)) = \frac { \partial F } { \partial t } \frac { d t } { d t } + \frac { \partial F } { \partial q } \frac { d q } { d t } + \frac { \partial f } { \partial q } \frac { d q } { d t }\)</p> </li> </ol> <p>In the above differentiation, <strong>it can be argued that t, q(t), and q’(t) are not independent.</strong> However, when performing partial differentiation of F, <strong>we assume that they are independent.</strong> In other words, the meaning of $\frac{\partial F}{\partial q}$ is simply to perform partial differentiation of function F with respect to the second argument and then substitute t, q(t), and q’(t) into the argument. . (according to the naming given initially)</p> <ol> <li>Generalization of Scalar, Vector, Matrix into Tensor</li> </ol> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> Scalar = Rank 0-Tensor
+ Vector = Rank 1-Tensor
+ Matrix = Rank 2-Tensor
+</code></pre></div></div> <p><img src="https://dl.dropbox.com/scl/fi/lr5c9iej1w4yhy3lfrdso/2024-03-23-14.58.06.webp?rlkey=a8ezxt81ct4rank5nz905xb6b" alt="enter image description here"/></p> <ol> <li>Splitting Higher Rank Tensor Function into Lower Rank Tensor function</li> </ol> <p><em>Higher Rank Tensor Function is a combination of Lower Rank Tensor Function.</em> \(\R^2\rightarrow \R^2 \text{ function } f(x_1, x_2) = (y_1, y_2) \\ \R^2\rightarrow\R \text{ function } f_1(x_1, x_2) = y_1 \text{, } f_2(x_1, x_2) = y_2\) In the example above, $f$ is a combination of $f_1$ and $f_2$, and like this, the function can be expressed as a combination of lower-dimensional functions. This suggests that <strong>calculus operations for arbitrary functions</strong> (such as vector fields) <strong>can be easily defined as long as calculus operations for scalar functions are well defined</strong>.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>XX Function = Function with output value type XX
+ type of input value does not matter.
+ 
+ example)
+ f:R-&gt;R : Scalar Function
+ f:R^n-&gt;R : Scalar Function
+ f:R-&gt;R^2 : Vector Function (a.k.a. Vector Field)
+ f:R^n-&gt;R^m : Vector Function
+ f:R^2-&gt; R^2 x R^3 : Matrix Function
+ f:R^3 x R^3 -&gt; R^3 x R^3 x R^3 : Rank 3-Tensor Function
+</code></pre></div></div> <ol> <li> <p>Defining Partial Differentiation of Vector-to-Scalar Function \(\text{for } \R^m\rightarrow \R \text{ function }f_k(x_1, x_2, \dots,x_m) = y_k \\ \frac{\partial f_k}{\partial x_t } := \lim_{h\rightarrow 0}{\frac{f_k(x_1, x_2, \dots, x_t+h,\dots,x_m) - f_k}{h}}\)</p> </li> <li> <p>Operator and Infinite Dimensional Vector Space (from Functional Analysis)</p> </li> </ol> <h5 id="defining-total-differentiation">Defining Total Differentiation</h5> <ol> <li>Total Differentiation of Scalar-to-Vector Function <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     // Total Differential Operator (for multivariable function)
+     input  : Scalar-to-Vector Function
+     output : Vector-to-Vector Function
+     =&gt; operation result : Vector
+</code></pre></div> </div> <p>\(\text{for } \R\rightarrow \R^n \text{ function }f(x) = (y_1, y_2, \dots,y_n) \\ \text{total differentiation }f'(x) :=(\frac{dy_1}{dx},\frac{dy_2}{dx},\dots,\frac{dy_n}{dx})\) This is the combination of $f’_k(x) = \frac{dy_k}{dx}$, which is the derivative of the Scalar-to-Scalar Function $f_k(x) = y_k$.</p> </li> <li> <p>Jacobian : Total Differential Operator of Vector-to-Vector Function \(\text{for } \R^n\rightarrow \R^m \text{ function }f(x_1, x_2, \dots,x_n) = (y_1, y_2, \dots,y_m) \\ \text{total differentiation } J[f] \stackrel{notation}{=} f'(x) \stackrel{notation}{=} \frac { \partial ( y _ { 1 } , y _ { 2 } \dots y _ { n } ) } { \partial ( x _ { 1 } , x _ { 2 } - x _ { m } ) } \\:=\left( \begin{array}{c} f_1'(X) \\ f_2'(X) \\ \vdots \\ f_m'(X) \end{array} \right) \\\text{where }\left\{ \begin{array}{ll} \text{vector } X = (x_1, x_2, \dots, x_n) \\ \R^n\rightarrow\R \text{ function } f_k(X) = y_k \end{array} \right.\)</p> </li> <li>Hessian : Second Total Differential Operator of Vector-to-Vector Function</li> <li>Further Total Differentiation of Vector-to-Vector Function</li> </ol> <h5 id="defining-operators-related-to-navla-symbols">Defining Operators related to Navla symbols</h5> <ol> <li>Gradient Operator (Navla Operator) <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     // Gradient Operator
+     input  : Vector-to-Scalar Function
+     output : Vector-to-Vector Function
+     =&gt; operation result : Vector
+</code></pre></div> </div> </li> <li>Divergence Operator <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    //Divergence Operator
+    input  : Vector-to-Vector Function
+    output : Vector-to-Scalar Function
+    =&gt; operation result : Scalar
+</code></pre></div> </div> </li> <li>Curl Operator <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     //Curl Operator
+     input  : Vector-to-Vector Function
+     output : Vector-to-Scalar Function
+     =&gt; result : Scalar
+</code></pre></div> </div> </li> <li>Laplacian Operator <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     //Laplacian Operator
+     input  : Vector-to-Vector Function
+     output : Vector-to-Scalar Function
+     =&gt; result : Vector-to-Scalar Function
+</code></pre></div> </div> <h5 id="differentiation-of-tensor-function-to-be-written-later">Differentiation of Tensor Function (To be written later)</h5> </li> </ol>]]></content><author><name></name></author><summary type="html"><![CDATA[CAL1-PREVIEW-1]]></summary></entry><entry><title type="html">a post with code diff</title><link href="https://hoonseokyoon.github.io/blog/2024/code-diff/" rel="alternate" type="text/html" title="a post with code diff"/><published>2024-01-27T19:22:00+00:00</published><updated>2024-01-27T19:22:00+00:00</updated><id>https://hoonseokyoon.github.io/blog/2024/code-diff</id><content type="html" xml:base="https://hoonseokyoon.github.io/blog/2024/code-diff/"><![CDATA[<p>You can display diff code by using the regular markdown syntax:</p> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">```</span><span class="nl">diff
 </span><span class="gh">diff --git a/sample.js b/sample.js
 index 0000001..0ddf2ba
 </span><span class="gd">--- a/sample.js
@@ -817,77 +853,4 @@ index 3bb754ac..a34839c0 100644
   &lt;p&gt;Sorry, the notebook you are looking for does not exist.&lt;/p&gt;
 <span class="cp">{%</span><span class="w"> </span><span class="nt">endif</span><span class="w"> </span><span class="cp">%}</span>
 {:/nomarkdown}
-</code></pre></div></div> <p>Let’s break it down: this is possible thanks to <a href="https://github.com/red-data-tools/jekyll-jupyter-notebook">Jekyll Jupyter Notebook plugin</a> that allows you to embed jupyter notebooks in your posts. It basically calls <a href="https://nbconvert.readthedocs.io/en/latest/usage.html#convert-html"><code class="language-plaintext highlighter-rouge">jupyter nbconvert --to html</code></a> to convert the notebook to an html page and then includes it in the post. Since <a href="https://jekyllrb.com/docs/configuration/markdown/">Kramdown</a> is the default Markdown renderer for Jekyll, we need to surround the call to the plugin with the <a href="https://kramdown.gettalong.org/syntax.html#extensions">::nomarkdown</a> tag so that it stops processing this part with Kramdown and outputs the content as-is.</p> <p>The plugin takes as input the path to the notebook, but it assumes the file exists. If you want to check if the file exists before calling the plugin, you can use the <code class="language-plaintext highlighter-rouge">file_exists</code> filter. This avoids getting a 404 error from the plugin and ending up displaying the main page inside of it instead. If the file does not exist, you can output a message to the user. The code displayed above outputs the following:</p> <div class="jupyter-notebook" style="position: relative; width: 100%; margin: 0 auto;"> <div class="jupyter-notebook-iframe-container"> <iframe src="/assets/jupyter/blog.ipynb.html" style="position: absolute; top: 0; left: 0; border-style: none;" width="100%" height="100%" onload="this.parentElement.style.paddingBottom = (this.contentWindow.document.documentElement.scrollHeight + 10) + 'px'"></iframe> </div> </div> <p>Note that the jupyter notebook supports both light and dark themes.</p>]]></content><author><name></name></author><category term="sample-posts"/><category term="formatting"/><category term="jupyter"/><summary type="html"><![CDATA[an example of a blog post with jupyter notebook]]></summary></entry><entry><title type="html">a post with custom blockquotes</title><link href="https://hoonseokyoon.github.io/blog/2023/custom-blockquotes/" rel="alternate" type="text/html" title="a post with custom blockquotes"/><published>2023-05-12T19:53:00+00:00</published><updated>2023-05-12T19:53:00+00:00</updated><id>https://hoonseokyoon.github.io/blog/2023/custom-blockquotes</id><content type="html" xml:base="https://hoonseokyoon.github.io/blog/2023/custom-blockquotes/"><![CDATA[<p>This post shows how to add custom styles for blockquotes. Based on <a href="https://github.com/sighingnow/jekyll-gitbook">jekyll-gitbook</a> implementation.</p> <p>We decided to support the same custom blockquotes as in <a href="https://sighingnow.github.io/jekyll-gitbook/jekyll/2022-06-30-tips_warnings_dangers.html">jekyll-gitbook</a>, which are also found in a lot of other sites’ styles. The styles definitions can be found on the <a href="https://github.com/alshedivat/al-folio/blob/master/_sass/_base.scss">_base.scss</a> file, more specifically:</p> <div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* Tips, warnings, and dangers */</span>
-<span class="nc">.post</span> <span class="nc">.post-content</span> <span class="nt">blockquote</span> <span class="p">{</span>
-  <span class="k">&amp;</span><span class="nc">.block-tip</span> <span class="p">{</span>
-    <span class="nl">border-color</span><span class="p">:</span> <span class="nf">var</span><span class="p">(</span><span class="o">--</span><span class="n">global-tip-block</span><span class="p">);</span>
-    <span class="nl">background-color</span><span class="p">:</span> <span class="nf">var</span><span class="p">(</span><span class="o">--</span><span class="n">global-tip-block-bg</span><span class="p">);</span>
-
-    <span class="nt">p</span> <span class="p">{</span>
-      <span class="nl">color</span><span class="p">:</span> <span class="nf">var</span><span class="p">(</span><span class="o">--</span><span class="n">global-tip-block-text</span><span class="p">);</span>
-    <span class="p">}</span>
-
-    <span class="nt">h1</span><span class="o">,</span>
-    <span class="nt">h2</span><span class="o">,</span>
-    <span class="nt">h3</span><span class="o">,</span>
-    <span class="nt">h4</span><span class="o">,</span>
-    <span class="nt">h5</span><span class="o">,</span>
-    <span class="nt">h6</span> <span class="p">{</span>
-      <span class="nl">color</span><span class="p">:</span> <span class="nf">var</span><span class="p">(</span><span class="o">--</span><span class="n">global-tip-block-title</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-
-  <span class="k">&amp;</span><span class="nc">.block-warning</span> <span class="p">{</span>
-    <span class="nl">border-color</span><span class="p">:</span> <span class="nf">var</span><span class="p">(</span><span class="o">--</span><span class="n">global-warning-block</span><span class="p">);</span>
-    <span class="nl">background-color</span><span class="p">:</span> <span class="nf">var</span><span class="p">(</span><span class="o">--</span><span class="n">global-warning-block-bg</span><span class="p">);</span>
-
-    <span class="nt">p</span> <span class="p">{</span>
-      <span class="nl">color</span><span class="p">:</span> <span class="nf">var</span><span class="p">(</span><span class="o">--</span><span class="n">global-warning-block-text</span><span class="p">);</span>
-    <span class="p">}</span>
-
-    <span class="nt">h1</span><span class="o">,</span>
-    <span class="nt">h2</span><span class="o">,</span>
-    <span class="nt">h3</span><span class="o">,</span>
-    <span class="nt">h4</span><span class="o">,</span>
-    <span class="nt">h5</span><span class="o">,</span>
-    <span class="nt">h6</span> <span class="p">{</span>
-      <span class="nl">color</span><span class="p">:</span> <span class="nf">var</span><span class="p">(</span><span class="o">--</span><span class="n">global-warning-block-title</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-
-  <span class="k">&amp;</span><span class="nc">.block-danger</span> <span class="p">{</span>
-    <span class="nl">border-color</span><span class="p">:</span> <span class="nf">var</span><span class="p">(</span><span class="o">--</span><span class="n">global-danger-block</span><span class="p">);</span>
-    <span class="nl">background-color</span><span class="p">:</span> <span class="nf">var</span><span class="p">(</span><span class="o">--</span><span class="n">global-danger-block-bg</span><span class="p">);</span>
-
-    <span class="nt">p</span> <span class="p">{</span>
-      <span class="nl">color</span><span class="p">:</span> <span class="nf">var</span><span class="p">(</span><span class="o">--</span><span class="n">global-danger-block-text</span><span class="p">);</span>
-    <span class="p">}</span>
-
-    <span class="nt">h1</span><span class="o">,</span>
-    <span class="nt">h2</span><span class="o">,</span>
-    <span class="nt">h3</span><span class="o">,</span>
-    <span class="nt">h4</span><span class="o">,</span>
-    <span class="nt">h5</span><span class="o">,</span>
-    <span class="nt">h6</span> <span class="p">{</span>
-      <span class="nl">color</span><span class="p">:</span> <span class="nf">var</span><span class="p">(</span><span class="o">--</span><span class="n">global-danger-block-title</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div> <p>A regular blockquote can be used as following:</p> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gt">&gt; This is a regular blockquote</span>
-<span class="gt">&gt; and it can be used as usual</span>
-</code></pre></div></div> <blockquote> <p>This is a regular blockquote and it can be used as usual</p> </blockquote> <p>These custom styles can be used by adding the specific class to the blockquote, as follows:</p> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gt">&gt; ##### TIP</span>
-<span class="gt">&gt;</span>
-<span class="gt">&gt; A tip can be used when you want to give advice</span>
-<span class="gt">&gt; related to a certain content.</span>
-{: .block-tip }
-</code></pre></div></div> <blockquote class="block-tip"> <h5 id="tip">TIP</h5> <p>A tip can be used when you want to give advice related to a certain content.</p> </blockquote> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gt">&gt; ##### WARNING</span>
-<span class="gt">&gt;</span>
-<span class="gt">&gt; This is a warning, and thus should</span>
-<span class="gt">&gt; be used when you want to warn the user</span>
-{: .block-warning }
-</code></pre></div></div> <blockquote class="block-warning"> <h5 id="warning">WARNING</h5> <p>This is a warning, and thus should be used when you want to warn the user</p> </blockquote> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gt">&gt; ##### DANGER</span>
-<span class="gt">&gt;</span>
-<span class="gt">&gt; This is a danger zone, and thus should</span>
-<span class="gt">&gt; be used carefully</span>
-{: .block-danger }
-</code></pre></div></div> <blockquote class="block-danger"> <h5 id="danger">DANGER</h5> <p>This is a danger zone, and thus should be used carefully</p> </blockquote> ]]></content><author><name></name></author><category term="sample-posts"/><category term="formatting"/><category term="blockquotes"/><summary type="html"><![CDATA[an example of a blog post with custom blockquotes]]></summary></entry></feed>
+</code></pre></div></div> <p>Let’s break it down: this is possible thanks to <a href="https://github.com/red-data-tools/jekyll-jupyter-notebook">Jekyll Jupyter Notebook plugin</a> that allows you to embed jupyter notebooks in your posts. It basically calls <a href="https://nbconvert.readthedocs.io/en/latest/usage.html#convert-html"><code class="language-plaintext highlighter-rouge">jupyter nbconvert --to html</code></a> to convert the notebook to an html page and then includes it in the post. Since <a href="https://jekyllrb.com/docs/configuration/markdown/">Kramdown</a> is the default Markdown renderer for Jekyll, we need to surround the call to the plugin with the <a href="https://kramdown.gettalong.org/syntax.html#extensions">::nomarkdown</a> tag so that it stops processing this part with Kramdown and outputs the content as-is.</p> <p>The plugin takes as input the path to the notebook, but it assumes the file exists. If you want to check if the file exists before calling the plugin, you can use the <code class="language-plaintext highlighter-rouge">file_exists</code> filter. This avoids getting a 404 error from the plugin and ending up displaying the main page inside of it instead. If the file does not exist, you can output a message to the user. The code displayed above outputs the following:</p> <div class="jupyter-notebook" style="position: relative; width: 100%; margin: 0 auto;"> <div class="jupyter-notebook-iframe-container"> <iframe src="/assets/jupyter/blog.ipynb.html" style="position: absolute; top: 0; left: 0; border-style: none;" width="100%" height="100%" onload="this.parentElement.style.paddingBottom = (this.contentWindow.document.documentElement.scrollHeight + 10) + 'px'"></iframe> </div> </div> <p>Note that the jupyter notebook supports both light and dark themes.</p>]]></content><author><name></name></author><category term="sample-posts"/><category term="formatting"/><category term="jupyter"/><summary type="html"><![CDATA[an example of a blog post with jupyter notebook]]></summary></entry></feed>
