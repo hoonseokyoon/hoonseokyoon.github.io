@@ -32,7 +32,7 @@ test('localized home exposes the approved public record in both languages', asyn
   await expect(page.getByText('개인 이력과 프로젝트 기록', { exact: true })).toBeVisible();
 
   const projects = page.locator('section[aria-labelledby="selected-projects-title"]');
-  await expect(projects.getByRole('heading', { level: 2, name: 'Tokamak' })).toBeVisible();
+  await expect(projects.getByRole('heading', { level: 3, name: 'Tokamak' })).toBeVisible();
   await expect(
     projects.getByText(
       '공부 글과 기술 설명을 Project → SubProject → LearningNode 구조로 연결하는 이중 언어 지식 사이트입니다.',
@@ -79,6 +79,15 @@ test('language switch preserves a core route', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Outputs' })).toBeVisible();
 });
 
+test('record headings follow their containing section hierarchy', async ({ page }) => {
+  await page.goto('/ko/projects/');
+  await expect(page.getByRole('heading', { level: 2, name: '진행 중' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 3, name: 'Tokamak' })).toBeVisible();
+
+  await page.goto('/ko/timeline/');
+  await expect(page.getByRole('heading', { level: 2, name: 'Tokamak 프로젝트 시작' })).toBeVisible();
+});
+
 test('Tokamak project detail connects the approved project, output, and timeline', async ({ page }) => {
   await page.goto('/ko/projects/tokamak/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'ko');
@@ -97,7 +106,7 @@ test('Tokamak project detail connects the approved project, output, and timeline
   await expect(page.getByRole('heading', { name: '관련 산출물' })).toBeVisible();
   await expect(page.getByRole('heading', { level: 3, name: 'Tokamak SvelteKit 사이트' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '관련 이력' })).toBeVisible();
-  await expect(page.getByText('Tokamak 프로젝트 시작', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 3, name: 'Tokamak 프로젝트 시작' })).toBeVisible();
 
   await page.getByRole('navigation', { name: '언어 선택' }).getByRole('link', { name: 'EN' }).click();
   await expect(page).toHaveURL(/\/en\/projects\/tokamak\/$/);

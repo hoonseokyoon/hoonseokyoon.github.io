@@ -1,8 +1,11 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadCatalogFromDisk } from '../src/lib/content/catalog.node';
+import { localizedPublicCatalog } from '../src/lib/content/public';
 import { canonicalRoutes } from '../src/lib/content/route-manifest';
 import { siteOrigin, socialCardAlt, socialCardUrl } from '../src/lib/site';
+import { outputStructuredDataId, outputStructuredDataType } from '../src/lib/structured-data';
+import type { ContentCatalog } from '../src/lib/content/types';
 import {
   assertSameSet,
   buildRoot,
@@ -43,6 +46,44 @@ function inspectForTemplateLeakage(): void {
     for (const fragment of forbidden) {
       if (source.includes(fragment)) {
         throw new Error(`Build contains forbidden template or fixture text ${JSON.stringify(fragment)} in ${file}`);
+      }
+    }
+  }
+}
+
+function collectStrings(value: unknown): string[] {
+  if (typeof value === 'string') return [value];
+  if (Array.isArray(value)) return value.flatMap(collectStrings);
+  if (value && typeof value === 'object') return Object.values(value).flatMap(collectStrings);
+  return [];
+}
+
+function inspectPublicPayloadBoundary(catalog: ContentCatalog): void {
+  const internalKeys = ['editorialStatus', 'sourceLocale', 'evidence', 'checkedAt', 'contributors'];
+  for (const file of walkFiles(buildRoot).filter((path) => /\.(?:html|js|json)$/.test(path))) {
+    const source = readFileSync(file, 'utf8');
+    for (const key of internalKeys) {
+      const serializedKey = new RegExp(`(?:["']${key}["']|\\.${key}|\\b${key}\\b)\\s*[:=]`);
+      if (serializedKey.test(source)) {
+        throw new Error(`Build exposes internal catalog field ${JSON.stringify(key)} in ${file}`);
+      }
+    }
+  }
+
+  const contentStrings = [catalog.person, ...catalog.timeline, ...catalog.projects, ...catalog.outputs].flatMap(
+    (record) => collectStrings(record.content)
+  );
+  for (const locale of ['ko', 'en'] as const) {
+    const selectedPayload = JSON.stringify(localizedPublicCatalog(catalog, locale));
+    const unselectedContent = [
+      ...new Set(contentStrings.filter((value) => value.length >= 8 && !selectedPayload.includes(value)))
+    ];
+    for (const file of walkFiles(join(buildRoot, locale)).filter((path) => /\.(?:html|json)$/.test(path))) {
+      const source = readFileSync(file, 'utf8');
+      for (const value of unselectedContent) {
+        if (source.includes(value)) {
+          throw new Error(`Build exposes unselected locale content ${JSON.stringify(value)} in ${file}`);
+        }
       }
     }
   }
@@ -194,6 +235,49 @@ function inspectProjectIdentity(): void {
   }
 }
 
+function inspectOutputIdentity(catalog: ContentCatalog): void {
+  for (const locale of ['ko', 'en'] as const) {
+    const route = `/${locale}/outputs/`;
+    const blocks = jsonLdBlocks(readFileSync(routeArtifactPath(route), 'utf8'));
+    if (blocks.length !== 1) throw new Error(`${route} must contain exactly one JSON-LD block`);
+    if (blocks[0]['@context'] !== 'https://schema.org') throw new Error(`${route} JSON-LD context is invalid`);
+    const graph = blocks[0]['@graph'];
+    if (!Array.isArray(graph)) throw new Error(`${route} Output JSON-LD graph is missing`);
+
+    const outputs = localizedPublicCatalog(catalog, locale).outputs;
+    assertSameSet(
+      graph.flatMap((node) =>
+        node && typeof node === 'object' && typeof node['@id'] === 'string' ? [node['@id']] : []
+      ),
+      outputs.map((output) => outputStructuredDataId(output.id)),
+      `${route} Output JSON-LD IDs`
+    );
+
+    for (const output of outputs) {
+      const id = outputStructuredDataId(output.id);
+      const node = graph.find((candidate) => candidate && typeof candidate === 'object' && candidate['@id'] === id);
+      const primary = output.links.find((link) => link.primary);
+      const author = node && typeof node === 'object' ? node.author : undefined;
+      if (
+        !node ||
+        typeof node !== 'object' ||
+        node['@type'] !== outputStructuredDataType(output.kind) ||
+        node.url !== primary?.url ||
+        node.name !== output.content.title ||
+        node.description !== output.content.summary ||
+        node.creditText !== output.content.contribution ||
+        node.datePublished !== output.date ||
+        node.inLanguage !== output.locale ||
+        !author ||
+        typeof author !== 'object' ||
+        author['@id'] !== `${siteOrigin}/#person`
+      ) {
+        throw new Error(`${route} Output JSON-LD is invalid for ${output.id}`);
+      }
+    }
+  }
+}
+
 function inspectSitemap(routes: string[]): void {
   const sitemap = readFileSync(routeArtifactPath('/sitemap.xml'), 'utf8');
   const blocks = [...sitemap.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((match) => match[1]);
@@ -274,7 +358,9 @@ inspectRobots();
 inspectSocialCard();
 inspectRootIdentity();
 inspectProjectIdentity();
+inspectOutputIdentity(catalog);
 inspectForTemplateLeakage();
+inspectPublicPayloadBoundary(catalog);
 
 for (const redirect of activeRedirects) {
   const target = redirect.target.split('#', 1)[0];

@@ -1,12 +1,13 @@
 import type { PageServerLoad } from './$types';
 import { catalog } from '$lib/content/catalog.server';
-import { publishedCatalog, sortedOutputs, sortedProjects, sortedTimeline } from '$lib/content/public';
+import { localizedPublicCatalog, sortedOutputs, sortedProjects, sortedTimeline } from '$lib/content/public';
 import type { Locale } from '$lib/site';
 
 export const load: PageServerLoad = ({ params }) => {
-  const publicCatalog = publishedCatalog(catalog);
+  const lang = params.lang as Locale;
+  const publicCatalog = localizedPublicCatalog(catalog, lang);
   return {
-    lang: params.lang as Locale,
+    lang,
     person: publicCatalog.person,
     now: sortedTimeline(publicCatalog.timeline.filter((event) => event.period.end === 'present')).slice(0, 3),
     projects: sortedProjects(publicCatalog.projects.filter((project) => project.featuredRank !== undefined)).slice(

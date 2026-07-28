@@ -3,7 +3,6 @@
   import OutputList from '$lib/components/OutputList.svelte';
   import PageMeta from '$lib/components/PageMeta.svelte';
   import ProjectCard from '$lib/components/ProjectCard.svelte';
-  import { localizedContent } from '$lib/content/public';
   import { localizedMetadata } from '$lib/metadata';
   import { localizedHref, tokamakHref } from '$lib/navigation';
   import { personId, websiteId } from '$lib/site';
@@ -12,13 +11,13 @@
   let { data } = $props();
   const labels = $derived(ui[data.lang]);
   const metadata = $derived(localizedMetadata(data.lang, ''));
-  const person = $derived(data.person ? localizedContent(data.person, data.lang) : null);
+  const person = $derived(data.person);
   const title = $derived(
     person ? `${person.content.name} · ${labels.personalRecord}` : `Hoonseok Yoon · ${labels.personalRecord}`
   );
   const description = $derived(person?.content.summary ?? labels.profileApprovalDescription);
   const jsonLd = $derived(
-    data.person && person
+    person
       ? {
           '@context': 'https://schema.org',
           '@graph': [
@@ -27,13 +26,13 @@
               '@id': personId,
               name: person.content.name,
               description: person.content.summary,
-              url: data.person.canonicalUrl,
-              sameAs: data.person.sameAs
+              url: person.canonicalUrl,
+              sameAs: person.sameAs
             },
             {
               '@type': 'WebSite',
               '@id': websiteId,
-              url: data.person.canonicalUrl,
+              url: person.canonicalUrl,
               name: title,
               inLanguage: data.lang,
               author: { '@id': personId }
@@ -46,19 +45,19 @@
 
 <PageMeta {title} {description} {...metadata} {jsonLd} />
 
-{#if data.person && person}
+{#if person}
   <section class="home-hero">
     <div class="person-hero" lang={person.locale}>
       <p class="eyebrow">{labels.homeEyebrow}</p>
       <h1>{person.content.name}</h1>
       <p class="person-headline">{person.content.headline}</p>
       <p class="person-summary">{person.content.summary}</p>
-      {#if data.person.sameAs.length || data.person.contacts.length}
+      {#if person.sameAs.length || person.contacts.length}
         <ul class="profile-links">
-          {#each data.person.sameAs as href}
+          {#each person.sameAs as href}
             <li><a {href}>{new URL(href).hostname.replace('www.', '')}<span aria-hidden="true"> ↗</span></a></li>
           {/each}
-          {#each data.person.contacts as contact}
+          {#each person.contacts as contact}
             <li><a href={contact.url}>{contact.kind}</a></li>
           {/each}
         </ul>
@@ -70,10 +69,9 @@
         <h2 id="now-title">{labels.now}</h2>
         <ul class="now-list">
           {#each data.now as event}
-            {@const localized = localizedContent(event, data.lang)}
-            <li lang={localized.locale}>
-              <strong>{localized.content.title}</strong>
-              <p>{localized.content.summary}</p>
+            <li lang={event.locale}>
+              <strong>{event.content.title}</strong>
+              <p>{event.content.summary}</p>
             </li>
           {/each}
         </ul>

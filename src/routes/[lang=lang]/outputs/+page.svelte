@@ -3,12 +3,14 @@
   import PageHeader from '$lib/components/PageHeader.svelte';
   import PageMeta from '$lib/components/PageMeta.svelte';
   import { localizedMetadata } from '$lib/metadata';
+  import { outputStructuredData } from '$lib/structured-data';
   import { ui } from '$lib/ui';
 
   let { data } = $props();
   const labels = $derived(ui[data.lang]);
   const metadata = $derived(localizedMetadata(data.lang, 'outputs'));
   const title = $derived(`${labels.outputs} · Hoonseok Yoon`);
+  const jsonLd = $derived(outputStructuredData(data.outputs));
   const groups = [
     ['paper', 'publications'],
     ['software', 'software'],
@@ -22,7 +24,7 @@
   ] as const;
 </script>
 
-<PageMeta {title} description={labels.outputsDescription} {...metadata} />
+<PageMeta {title} description={labels.outputsDescription} {...metadata} {jsonLd} />
 <PageHeader eyebrow="AUTHORED RESULTS" title={labels.outputs} description={labels.outputsDescription} />
 
 {#if data.outputs.length}

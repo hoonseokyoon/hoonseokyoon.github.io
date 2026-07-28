@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { EntryGenerator, PageServerLoad } from './$types';
 import { catalog } from '$lib/content/catalog.server';
-import { projectOutputs, projectTimeline, publishedCatalog } from '$lib/content/public';
+import { localizedPublicCatalog, projectOutputs, projectTimeline } from '$lib/content/public';
 import type { Locale } from '$lib/site';
 
 export const entries: EntryGenerator = () =>
@@ -13,12 +13,13 @@ export const entries: EntryGenerator = () =>
     ]);
 
 export const load: PageServerLoad = ({ params }) => {
-  const publicCatalog = publishedCatalog(catalog);
+  const lang = params.lang as Locale;
+  const publicCatalog = localizedPublicCatalog(catalog, lang);
   const project = publicCatalog.projects.find((candidate) => candidate.id === params.id);
   if (!project) error(404, 'Project not found');
 
   return {
-    lang: params.lang as Locale,
+    lang,
     project,
     timeline: projectTimeline(publicCatalog, project.id),
     outputs: projectOutputs(publicCatalog, project.id)
