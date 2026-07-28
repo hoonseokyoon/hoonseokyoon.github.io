@@ -1,6 +1,6 @@
 # Personal site and Tokamak migration
 
-Status: **CP1, CP2, public seed, and CP3 approved**
+Status: **CP1, CP2, public seed, and CP3 approved; both sites live**
 
 Audit date: **2026-07-28 (Asia/Seoul)**
 
@@ -31,7 +31,8 @@ The documents are deliberately separated by decision responsibility:
    Person, TimelineEvent, Project, Output, provenance, locale, and cross-site
    linking contract.
 7. [`06-implementation-status.md`](06-implementation-status.md) records the
-   post-CP2 implementation, verification evidence, and remaining approval gates.
+   post-CP2 implementation, production cutover, verification evidence, and
+   rollback point.
 
 ## Safety boundary after CP2
 
@@ -62,11 +63,12 @@ included in the checkpoint itself.
 The initial public seed is approved: one Person, TimelineEvent, Project, and
 Output record is `published`, and the release content validator passes. The
 first-party root application, route policy, guarded deployment workflow, and
-social-preview asset form the root cutover source. The Tokamak identity link and
+social-preview asset now form the live root site. The Tokamak identity link and
 rewritten KO/EN calculus article were deployed first, and both live article URLs
 were verified before the root calculus redirect gate was enabled.
 
 The root full verification and real-content visual review passed before CP3.
-The final cutover still uses the guarded default-branch workflow and retains the
-legacy `gh-pages` commit as a rollback point. See `06-implementation-status.md`
-for the validation evidence and execution contract.
+The final cutover completed through the guarded default-branch workflow, and
+the live root checks plus cross-site integration checks passed. The legacy
+`gh-pages` commit remains the rollback point. See `06-implementation-status.md`
+for the validation evidence and execution record.

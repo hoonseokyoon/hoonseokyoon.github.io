@@ -1,6 +1,6 @@
 # CP3 cutover record
 
-Status: **CP3 approved; Tokamak live; root cutover source prepared**
+Status: **CP3 complete; Tokamak and the root personal site are live**
 
 Implementation date: **2026-07-28 (Asia/Seoul)**
 
@@ -15,15 +15,18 @@ CP3 approval date: **2026-07-28 (Asia/Seoul)**
 - Root rollback artifact: `origin/gh-pages` commit
   `ff96ac64f9315ece3e5cf0b458ae42a4ccd2ffe7`
 - Root Pages publishing source at cutover start: legacy `gh-pages:/`
+- Root production merge: PR `#1`, commit
+  `84a016aeeecff9abe2186a3f0c80f903a0940562`
+- Root Pages build type after cutover: `workflow`
+- Root Pages run `30327485908`: verification, artifact upload, and deployment passed
 - Tokamak production merge: PR `#65`, commit
   `a9f29da7fdcf931ed7a7b20faf42223e8094838b`
 - Tokamak Pages run `30326972100`: build, deploy, and live verification passed
 
-The root Pages workflow accepts only a manual dispatch whose
-`cp3_approved` input is true and whose ref is the repository default branch. It
-still runs the complete release validator before uploading an artifact. This is
-an additional guard; it does not replace the CP3 decision or the Pages source
-change that would follow it.
+The root Pages workflow accepts only a manual dispatch whose `cp3_approved`
+input is true and whose ref is the repository default branch. The approved run
+executed from `master`, repeated the complete release validator, uploaded the
+artifact, and deployed it after the Pages build type changed to `workflow`.
 
 ## Root implementation completed
 
@@ -89,6 +92,18 @@ their expected title, canonical, shared Person ID, and visible root author link.
 - `npm audit --audit-level=low`: 0 vulnerabilities
 - Full repository `npm run verify`: passed
 
+### Root production
+
+- GitHub Pages workflow run `30327485908`: passed
+- Public root, KO/EN home, KO/EN Tokamak project detail, social card, sitemap,
+  robots, compatibility redirects, 404 behavior, and Person JSON-LD: 17/17
+  checks passed against cache-busted production responses
+- Root-to-Tokamak links, both localized calculus articles, and the shared
+  Tokamak-to-root Person identity: 5/5 integration checks passed
+- Root Pages API after deployment: `status=built`, `build_type=workflow`
+- The retired `/publications/` route returns 404; the legacy calculus route
+  returns the approved noindex redirect document to the live Tokamak article
+
 ### Tokamak artifact
 
 - Svelte/TypeScript diagnostics: 0 errors, 0 warnings
@@ -105,18 +120,18 @@ their expected title, canonical, shared Person ID, and visible root author link.
 ## CP3 execution contract
 
 The minimal public seed approval, full local verification, production-content
-visual review, and CP3 approval are complete. The execution order is fixed:
+visual review, CP3 approval, and production cutover are complete. The execution
+order was:
 
 1. deploy Tokamak first;
 2. verify both KO and EN calculus target URLs in the live environment;
 3. enable the root legacy calculus redirect only after those checks pass;
 4. run the final root checks and perform the root GitHub Pages cutover.
 
-Steps 1–3 were complete before this root source was frozen. Step 4 may deploy
-only from the default branch through the manual workflow with
-`cp3_approved: true`; that workflow repeats the complete release validation
-before uploading the Pages artifact. The legacy `gh-pages` commit remains the
-documented rollback source.
+All four steps completed in order. Step 4 deployed only from the default branch
+through the manual workflow with `cp3_approved: true`, and that workflow
+repeated the complete release validation before uploading the Pages artifact.
+The legacy `gh-pages` commit remains the documented rollback source.
 
 No inferred education, employment, location, email, collaborator, or impact
 claim was added to satisfy the seed gate.
