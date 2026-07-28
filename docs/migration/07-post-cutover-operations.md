@@ -1,10 +1,12 @@
 # Post-cutover operations contract
 
-Status: **CP4 approved; implementation and external readback in progress**
+Status: **CP4 complete; activation release verified**
 
 Proposal date: **2026-07-28 (Asia/Seoul)**
 
 Approval date: **2026-07-28 (Asia/Seoul)**
+
+Completion date: **2026-07-28 (Asia/Seoul)**
 
 ## Purpose
 
@@ -21,9 +23,10 @@ cutover workflow:
   verification job.
 
 CP4 approved the repeatable operating contract that replaces this one-time
-gate. Implementation proceeds through reviewed pull requests; branch protection
-and production publication follow only after their prerequisite default-branch
-checks succeed.
+gate. Implementation and external settings were completed through reviewed pull
+requests, with branch protection and production publication applied only after
+their prerequisite default-branch checks succeeded. The execution record below
+captures the permanent GitHub evidence and API readback.
 
 ## Captured pre-implementation baseline
 
@@ -376,6 +379,66 @@ The user's unqualified CP4 approval on 2026-07-28 accepted all four decisions:
    human approvals initially and an emergency owner bypass.
 4. Keep Tokamak's automatic `main` deployment while adding an independent PR
    `Release verification` workflow.
+
+## CP4 execution record
+
+All timestamps below are from 2026-07-28. No personal content, Pages environment
+policy, rollback asset, or license decision changed during this execution.
+
+### Reviewed implementation
+
+- Tokamak [PR #67](https://github.com/hoonseokyoon/tokamak/pull/67)
+  introduced independent PR verification and merged as
+  `269330cdd54f677a04ab53cd26b929cac75bd4a4`. Its
+  [post-merge `Release verification`](https://github.com/hoonseokyoon/tokamak/actions/runs/30332244171)
+  and [Pages/live verification](https://github.com/hoonseokyoon/tokamak/actions/runs/30332244167)
+  succeeded.
+- Root [PR #4](https://github.com/hoonseokyoon/hoonseokyoon.github.io/pull/4)
+  implemented the durable publication workflow, release marker, and live
+  checker. The final
+  [Codex review](https://github.com/hoonseokyoon/hoonseokyoon.github.io/pull/4#issuecomment-5100722677)
+  found no major issues, the PR check succeeded, and the PR merged as
+  `05cb87b78ada2b27e1991d52f8b0f75fe93f7409`.
+- The exact Root merge SHA passed the default-branch
+  [`Release verification`](https://github.com/hoonseokyoon/hoonseokyoon.github.io/actions/runs/30334961235)
+  before any protection or publication mutation.
+
+### Protection and Pages readback
+
+Classic branch protection was applied and read back on Root `master` and
+Tokamak `main` with the same contract:
+
+- strict, up-to-date status checks;
+- app-bound `Release verification` from GitHub Actions app ID `15368`;
+- pull requests and resolved review conversations required;
+- zero mandatory numeric approvals initially;
+- force pushes and deletion disabled;
+- admin enforcement disabled for the approved emergency owner bypass.
+
+The normalized, allowlisted REST response fields captured at
+`2026-07-28T06:43:11Z` are preserved as
+[`cp4-settings-readback-2026-07-28.json`](./evidence/cp4-settings-readback-2026-07-28.json).
+The snapshot includes default-branch SHAs, empty repository-ruleset lists,
+branch protection, Pages configuration, and Pages environment branch policies.
+It omits credentials, actors, permission grants, and mutable API URLs.
+
+After protection, Root Pages still reported `build_type=workflow`; its stale
+`source=gh-pages:/` metadata was not treated as active legacy publishing, and
+the `github-pages` environment still allowed only `master` and rollback branch
+`gh-pages`. Tokamak Pages still reported `build_type=workflow`, source
+`main:/docs`, and an environment policy limited to `main`.
+
+### Activation publication
+
+The approved Root
+[manual publication run](https://github.com/hoonseokyoon/hoonseokyoon.github.io/actions/runs/30335102612)
+deployed exact SHA `05cb87b78ada2b27e1991d52f8b0f75fe93f7409` as Pages
+deployment `5635203446`. The final
+[cross-site live job](https://github.com/hoonseokyoon/hoonseokyoon.github.io/actions/runs/30335102612/job/90198442768)
+verified all 115 probes with zero retries and observed the release marker on its
+first preflight request. Independent cache-busted readback confirmed the exact
+marker bytes, expected MIME types, controlled Root and Tokamak routes, and a 404
+for the unique missing route.
 
 ## Execution boundary after approval
 
