@@ -1,12 +1,12 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { extname, join } from 'node:path';
 import { loadCatalogFromDisk } from '../src/lib/content/catalog.node';
 import { localizedPublicCatalog } from '../src/lib/content/public';
 import { canonicalRoutes } from '../src/lib/content/route-manifest';
 import { siteOrigin, socialCardAlt, socialCardUrl } from '../src/lib/site';
 import { outputStructuredDataId, outputStructuredDataType } from '../src/lib/structured-data';
 import type { ContentCatalog } from '../src/lib/content/types';
-import { containsSerializedProperty, internalCatalogFields } from './public-payload-contract';
+import { artifactContainsSerializedProperty, internalCatalogFields } from './public-payload-contract';
 import {
   assertSameSet,
   buildRoot,
@@ -60,10 +60,11 @@ function collectStrings(value: unknown): string[] {
 }
 
 function inspectPublicPayloadBoundary(catalog: ContentCatalog): void {
-  for (const file of walkFiles(buildRoot).filter((path) => /\.(?:html|js|json)$/.test(path))) {
+  const payloadFiles = walkFiles(buildRoot).filter((path) => /\.(?:html|js|json)$/.test(path));
+  for (const file of payloadFiles) {
     const source = readFileSync(file, 'utf8');
     for (const key of internalCatalogFields) {
-      if (containsSerializedProperty(source, key)) {
+      if (artifactContainsSerializedProperty(source, key, extname(file) as '.html' | '.js' | '.json')) {
         throw new Error(`Build exposes internal catalog field ${JSON.stringify(key)} in ${file}`);
       }
     }
@@ -77,7 +78,11 @@ function inspectPublicPayloadBoundary(catalog: ContentCatalog): void {
     const unselectedContent = [
       ...new Set(contentStrings.filter((value) => value.length >= 8 && !selectedPayload.includes(value)))
     ];
-    for (const file of walkFiles(join(buildRoot, locale)).filter((path) => /\.(?:html|json)$/.test(path))) {
+    const localePayloadFiles = [
+      ...walkFiles(join(buildRoot, locale)).filter((path) => /\.(?:html|json)$/.test(path)),
+      ...payloadFiles.filter((path) => path.endsWith('.js'))
+    ];
+    for (const file of new Set(localePayloadFiles)) {
       const source = readFileSync(file, 'utf8');
       for (const value of unselectedContent) {
         if (source.includes(value)) {
