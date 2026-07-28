@@ -1,8 +1,10 @@
-# Post-cutover operations proposal
+# Post-cutover operations contract
 
-Status: **proposed at CP4; operational changes are blocked pending approval**
+Status: **CP4 approved; implementation and external readback in progress**
 
 Proposal date: **2026-07-28 (Asia/Seoul)**
+
+Approval date: **2026-07-28 (Asia/Seoul)**
 
 ## Purpose
 
@@ -17,9 +19,10 @@ The root deployment workflow is still expressed as a cutover workflow:
 - it verifies and deploys the artifact, but has no reusable post-deployment live
   verification job.
 
-CP4 decides the repeatable operating contract that replaces this one-time gate.
-This proposal records the decision surface; it does not authorize implementation
-or external settings changes by itself.
+CP4 approved the repeatable operating contract that replaces this one-time
+gate. Implementation proceeds through reviewed pull requests; branch protection
+and production publication follow only after their prerequisite default-branch
+checks succeed.
 
 ## Current operational baseline
 
@@ -44,7 +47,8 @@ or external settings changes by itself.
 - Deployment trigger: push to `main`, plus manual dispatch
 - Post-merge jobs: `build`, `deploy`, and `Verify deployed site`
 - Live command: `npm run check:live -- --base "$LIVE_BASE"`
-- Independent pull-request verification workflow: none
+- Independent pull-request verification workflow: `.github/workflows/ci.yml`
+- Observed PR and default-branch check: `Release verification`
 - Pages environment branch policy: `main`
 - Default-branch protection or repository ruleset: none
 
@@ -153,6 +157,12 @@ Network access remains outside ordinary `npm run verify`. Unit tests use an
 injected fetch implementation; only post-deployment verification contacts the
 public sites.
 
+The production checker accepts only the exact trusted root origin
+`https://hoonseokyoon.github.io/`. It rejects credentials, ports, query strings,
+fragments, alternate hostnames, and non-root base paths. Derived targets are
+checked against the same origin before every request, and redirects remain
+manual so a response cannot silently move verification to an untrusted host.
+
 ### Retry boundary
 
 Follow the existing Tokamak live checker pattern:
@@ -232,9 +242,13 @@ checks out the same source revision and runs:
 npm run check:live -- --base "$LIVE_BASE" --expected-sha "$GITHUB_SHA"
 ```
 
-The workflow is successful only when this final job passes. Keep the
-`github-pages` concurrency group and `cancel-in-progress: false` so publications
-cannot overtake one another.
+The workflow is successful only when this final job passes. The live job runs
+after the artifact is already public, so the sequence is not a transactional
+deployment and a live-check failure requires explicit correction or rollback.
+
+Keep the `github-pages` concurrency group and `cancel-in-progress: false` so an
+in-flight publication is not cancelled. This setting does not guarantee FIFO
+ordering; the operator must dispatch only one approved publication at a time.
 
 ## Tokamak pull-request and deployment contract
 
@@ -244,7 +258,7 @@ Tokamak keeps its existing post-merge sequence:
 main push → build → deploy → Verify deployed site
 ```
 
-Before protecting `main`, add `.github/workflows/ci.yml` with:
+Tokamak PR #67 added `.github/workflows/ci.yml` before protecting `main`, with:
 
 - `pull_request` and push-to-`main` triggers;
 - one stable job named `Release verification`;
@@ -284,9 +298,8 @@ Apply equivalent protection to root `master` and Tokamak `main`:
   publication.
 
 The required check must be observed successfully on the current default SHA
-before protection is enabled. Root PR review integration must also be recognized
-before the post-merge audit PR or this proposal is merged; a missing review bot
-must not be disguised as an approval.
+before protection is enabled. Root PR #3 completed a recognized Codex review
+cycle before merge; a missing review bot is never treated as approval.
 
 Safe application order after CP4 approval:
 
@@ -300,6 +313,12 @@ Safe application order after CP4 approval:
 7. apply and read back Tokamak protection;
 8. confirm Tokamak Pages remains restricted to `main`;
 9. validate the next ordinary change through a PR, not a direct-push test.
+
+If classic branch protection on the private Tokamak repository returns a plan
+entitlement error, stop and record the 403 response. Do not weaken the contract,
+make the repository public, or substitute an unreviewed rule. Root `gh-pages`
+remains an intentionally unprotected rollback artifact; preserve its exact SHA
+checks and never use it as an ordinary publication branch.
 
 ## Failure and rollback contract
 
@@ -335,9 +354,9 @@ returning to workflow publishing.
 Tokamak rollback uses a reviewed revert to `main`; its normal deployment and
 `Verify deployed site` jobs must pass.
 
-## CP4 approval questions
+## CP4 approval record
 
-CP4 requires explicit approval of all four decisions:
+The user's unqualified CP4 approval on 2026-07-28 accepted all four decisions:
 
 1. Keep root deployment manual and replace `cp3_approved` with the reusable
    `publish_approved` gate.
@@ -349,22 +368,10 @@ CP4 requires explicit approval of all four decisions:
 4. Keep Tokamak's automatic `main` deployment while adding an independent PR
    `Release verification` workflow.
 
-An unqualified `CP4 approved` accepts all four decisions. An exception must name
-the numbered decision and its replacement behavior.
+## Execution boundary after approval
 
-## Blocked until CP4 approval
-
-Until approval, do not:
-
-- change either deployment trigger or approval input;
-- add or merge the root live checker or release marker;
-- add the Tokamak PR workflow;
-- create or modify branch protection, repository rulesets, Pages settings, or
-  environment protection;
-- dispatch a production deployment for this proposal;
-- delete or rewrite rollback branches, tags, or artifacts;
-- add personal facts or other public content;
-- change the license or Tokamak's parked design-contract work.
-
-The proposal may be reviewed. Operational implementation, settings changes,
-merge, and deployment remain blocked at CP4.
+CP4 authorizes only the operating changes listed in this contract. Personal
+facts and other public content, the license, Tokamak's parked design contract,
+hosting, environment-policy changes, rollback-asset mutation, and automatic
+rollback remain outside scope. The next content publication still requires its
+own explicit content approval.

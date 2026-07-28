@@ -7,6 +7,7 @@ import { siteOrigin, socialCardAlt, socialCardUrl } from '../src/lib/site';
 import { outputStructuredDataId, outputStructuredDataType } from '../src/lib/structured-data';
 import type { ContentCatalog } from '../src/lib/content/types';
 import { artifactContainsSerializedProperty, internalCatalogFields } from './public-payload-contract';
+import { assertReleaseMarkerAbsent } from './release-marker';
 import {
   assertSameSet,
   buildRoot,
@@ -333,6 +334,7 @@ function inspectRobots(): void {
 }
 
 requireBuild();
+assertReleaseMarkerAbsent();
 const catalog = loadCatalogFromDisk();
 const policy = loadRoutePolicy();
 if (!existsSync(`${buildRoot}/.nojekyll`)) throw new Error('build/.nojekyll is required for GitHub Pages');

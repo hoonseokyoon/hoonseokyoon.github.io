@@ -17,6 +17,8 @@
     "validate:content": "tsx scripts/validate-content.ts",
     "check:routes": "tsx scripts/check-route-parity.ts",
     "check:build": "tsx scripts/check-build.ts",
+    "write:release-marker": "tsx scripts/release-marker.ts",
+    "check:live": "tsx scripts/check-live.ts",
     "verify": "npm run check && npm run validate:content -- --release && npm test && npm run build && playwright test && npm run check:routes && npm run check:build",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
