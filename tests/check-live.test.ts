@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import {
   assertExpectedSha,
@@ -34,6 +35,27 @@ function htmlResponse(body: string, status = 200): Response {
 
 function marker(sha = expectedSha): string {
   return `{"commit":"${sha}"}\n`;
+}
+
+function pngCrc32(bytes: Uint8Array): number {
+  let crc = 0xffffffff;
+  for (const byte of bytes) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function firstPngChunk(body: Uint8Array, expectedType: string): { offset: number; length: number } {
+  const view = new DataView(body.buffer, body.byteOffset, body.byteLength);
+  let offset = 8;
+  while (offset + 12 <= body.length) {
+    const length = view.getUint32(offset);
+    const type = Buffer.from(body.subarray(offset + 4, offset + 8)).toString('ascii');
+    if (type === expectedType) return { offset, length };
+    offset += 12 + length;
+  }
+  throw new Error(`PNG fixture is missing ${expectedType}`);
 }
 
 function notFoundHtml(): string {
@@ -179,6 +201,7 @@ describe('trusted live-check input boundary', () => {
     expect(() => assertExpectedSha(expectedSha.toUpperCase())).toThrow(/lower-case/);
     expect(() => assertExpectedSha(expectedSha.slice(1))).toThrow(/exactly 40/);
     expect(() => resolveTrustedRoute(trustedLiveBase, '//evil.example/')).toThrow(/Unsafe/);
+    expect(() => resolveTrustedRoute(trustedLiveBase, '/tokamak/%2e%2e/evil/')).toThrow(/Unsafe/);
     expect(() => parseLiveArguments(['--expected-sha', expectedSha, '--expected-sha', expectedSha])).toThrow(
       /only once/
     );
@@ -222,6 +245,23 @@ describe('catalog and policy-derived plan', () => {
     expect(outputs?.expectedFragments).toEqual(['software']);
     expect(plan.missingRoute).toBe(`/__root-live-check-missing-${expectedSha}/`);
     expect(new Set(plan.probes.map((probe) => probe.route)).size).toBe(plan.probes.length);
+    expect(plan.probes).toHaveLength(115);
+    const counts = plan.probes.reduce<Record<string, number>>((result, probe) => {
+      result[probe.kind] = (result[probe.kind] ?? 0) + 1;
+      return result;
+    }, {});
+    expect(counts).toEqual({
+      localized: 10,
+      'localized-data': 10,
+      'root-redirect': 1,
+      'not-found': 79,
+      'social-card': 1,
+      'root-sitemap': 1,
+      robots: 1,
+      'compatibility-redirect': 6,
+      'tokamak-page': 5,
+      'tokamak-sitemap': 1
+    });
   });
 });
 
@@ -411,6 +451,69 @@ describe('semantic response contracts', () => {
     expect(() => validateLiveProbe(probe, response(invalid, 200, 'application/json'), encoder.encode(invalid))).toThrow(
       /internal catalog field evidence[\s\S]*unselected locale content/
     );
+
+    const escaped = String.raw`{"\u0065vidence":"Fixture \u0050erson","copy":"UNSELECTED \u0045NGLISH PROSE"}`;
+    expect(() => validateLiveProbe(probe, response(escaped, 200, 'application/json'), encoder.encode(escaped))).toThrow(
+      /forbidden template\/private text Fixture Person[\s\S]*internal catalog field evidence[\s\S]*unselected locale content/
+    );
+  });
+
+  it('accepts the real social card and rejects CRC-corrupted image data', () => {
+    const body = new Uint8Array(readFileSync(new URL('../static/social-card.png', import.meta.url)));
+    const probe: LiveProbe = { kind: 'social-card', route: '/social-card.png' };
+    expect(() => validateLiveProbe(probe, response(body, 200, 'image/png'), body)).not.toThrow();
+
+    const corrupted = body.slice();
+    corrupted[corrupted.length - 1] ^= 0xff;
+    expect(() => validateLiveProbe(probe, response(corrupted, 200, 'image/png'), corrupted)).toThrow(/invalid CRC/);
+
+    const invalidCompressedData = body.slice();
+    const idat = firstPngChunk(invalidCompressedData, 'IDAT');
+    invalidCompressedData[idat.offset + 8] = 0;
+    const invalidView = new DataView(
+      invalidCompressedData.buffer,
+      invalidCompressedData.byteOffset,
+      invalidCompressedData.byteLength
+    );
+    invalidView.setUint32(
+      idat.offset + 8 + idat.length,
+      pngCrc32(invalidCompressedData.subarray(idat.offset + 4, idat.offset + 8 + idat.length))
+    );
+    expect(() =>
+      validateLiveProbe(probe, response(invalidCompressedData, 200, 'image/png'), invalidCompressedData)
+    ).toThrow(/invalid compressed image data/);
+  });
+
+  it('keeps every Tokamak sitemap URL inside the normalized controlled base', () => {
+    const probe: LiveProbe = {
+      kind: 'tokamak-sitemap',
+      route: '/tokamak/sitemap.xml',
+      requiredRoutes: ['/tokamak/en/']
+    };
+    const valid = '<urlset><url><loc>https://hoonseokyoon.github.io/tokamak/en/</loc></url></urlset>';
+    expect(() =>
+      validateLiveProbe(probe, response(valid, 200, 'application/xml'), encoder.encode(valid))
+    ).not.toThrow();
+
+    const escaped = `${valid.replace('</urlset>', '')}<url><loc>https://hoonseokyoon.github.io/tokamak/%2e%2e/evil/</loc></url></urlset>`;
+    expect(() => validateLiveProbe(probe, response(escaped, 200, 'application/xml'), encoder.encode(escaped))).toThrow(
+      /escaped its controlled base/
+    );
+
+    const hidden = `${valid.replace('</urlset>', '')}<url><loc><![CDATA[https://evil.example/]]></loc></url></urlset>`;
+    expect(() => validateLiveProbe(probe, response(hidden, 200, 'application/xml'), encoder.encode(hidden))).toThrow(
+      /unsupported or malformed loc element/
+    );
+
+    const entityEscaped = `${valid.replace('</urlset>', '')}<url><loc>https://hoonseokyoon.github.io/tokamak/&#x2e;&#x2e;/evil/</loc></url></urlset>`;
+    expect(() =>
+      validateLiveProbe(probe, response(entityEscaped, 200, 'application/xml'), encoder.encode(entityEscaped))
+    ).toThrow(/escaped its controlled base/);
+
+    const prefixed = `${valid.replace('</urlset>', '')}<s:url xmlns:s="http://www.sitemaps.org/schemas/sitemap/0.9"><s:loc>https://evil.example/escape/</s:loc></s:url></urlset>`;
+    expect(() =>
+      validateLiveProbe(probe, response(prefixed, 200, 'application/xml'), encoder.encode(prefixed))
+    ).toThrow(/unsupported or malformed loc element/);
   });
 
   it('requires controlled Tokamak calculus pages to retain visible and structured shared authorship', () => {

@@ -32,21 +32,42 @@ describe('repository workflows', () => {
     expect(validate.name).toBe('Validate publication request');
     expect(validate.if).toBeUndefined();
     expect(validate.permissions).toEqual({ contents: 'read' });
-    expect(validate.steps[0].run).toContain('publish_approved must be true');
-    expect(validate.steps[0].run).toContain('dispatched_at=');
-    expect(validate.steps[0].run).toContain('publish_approved=$PUBLISH_APPROVED');
-    expect(validate.steps[0].run).toContain('SOURCE_REF_NAME');
+    const validationStep = validate.steps[0];
+    expect(validationStep.env).toMatchObject({
+      PUBLISH_APPROVED: '${{ inputs.publish_approved }}',
+      SOURCE_REF_NAME: '${{ github.ref_name }}',
+      SOURCE_REF_TYPE: '${{ github.ref_type }}',
+      DEFAULT_BRANCH: '${{ github.event.repository.default_branch }}',
+      SOURCE_SHA: '${{ github.sha }}',
+      ORIGINAL_ACTOR: '${{ github.actor }}',
+      TRIGGERING_ACTOR: '${{ github.triggering_actor }}',
+      RUN_ATTEMPT: '${{ github.run_attempt }}'
+    });
+    expect(validationStep.run).toContain('publish_approved must be true');
+    expect(validationStep.run).toContain(
+      'if [[ "$SOURCE_REF_TYPE" != "branch" || "$SOURCE_REF_NAME" != "$DEFAULT_BRANCH" ]]; then'
+    );
+    expect(validationStep.run).toContain('original_actor=$ORIGINAL_ACTOR');
+    expect(validationStep.run).toContain('triggering_actor=$TRIGGERING_ACTOR');
+    expect(validationStep.run).toContain('run_attempt=$RUN_ATTEMPT');
+    expect(validationStep.run).toContain('dispatched_at=');
+    expect(validationStep.run).toContain('publish_approved=$PUBLISH_APPROVED');
+    expect(validationStep.run).toContain('source_sha=$SOURCE_SHA');
 
     const build = pages.jobs.build;
     expect(build.needs).toBe('validate');
-    expect(build.permissions).toEqual({ contents: 'read' });
+    expect(build['timeout-minutes']).toBe(20);
+    expect(build.permissions).toEqual({ contents: 'read', pages: 'read' });
     expect(build.steps[0]).toMatchObject({
       uses: 'actions/checkout@v6',
       with: { ref: '${{ github.sha }}' }
     });
-    expect(build.steps[1].run).toContain('git rev-parse HEAD');
+    expect(build.steps[1].run).toBe('test "$(git rev-parse HEAD)" = "$GITHUB_SHA"');
     const verifyIndex = stepIndex(build.steps, (step) => step.run === 'npm run verify');
-    const markerIndex = stepIndex(build.steps, (step) => step.run?.startsWith('npm run write:release-marker'));
+    const markerIndex = stepIndex(
+      build.steps,
+      (step) => step.run === 'npm run write:release-marker -- --sha "$GITHUB_SHA"'
+    );
     const uploadIndex = stepIndex(build.steps, (step) => step.uses === 'actions/upload-pages-artifact@v5');
     expect(verifyIndex).toBeGreaterThan(-1);
     expect(markerIndex).toBeGreaterThan(verifyIndex);
@@ -64,11 +85,13 @@ describe('repository workflows', () => {
     const live = pages.jobs['verify-live'];
     expect(live.name).toBe('Verify deployed root and cross-site contracts');
     expect(live.needs).toBe('deploy');
+    expect(live['timeout-minutes']).toBe(30);
     expect(live.permissions).toEqual({ contents: 'read' });
     expect(live.steps[0]).toMatchObject({
       uses: 'actions/checkout@v6',
       with: { ref: '${{ github.sha }}' }
     });
+    expect(live.steps[1].run).toBe('test "$(git rev-parse HEAD)" = "$GITHUB_SHA"');
     expect(live.steps.some((step: any) => step.run === 'npm ci')).toBe(true);
     expect(source).not.toContain('npm ci --ignore-scripts');
     const liveStep = live.steps.find((step: any) => step.run?.startsWith('npm run check:live'));

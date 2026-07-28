@@ -28,6 +28,9 @@ jobs:
           SOURCE_REF_TYPE: ${{ github.ref_type }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           SOURCE_SHA: ${{ github.sha }}
+          ORIGINAL_ACTOR: ${{ github.actor }}
+          TRIGGERING_ACTOR: ${{ github.triggering_actor }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
         run: |
           if [[ "$PUBLISH_APPROVED" != "true" ]]; then
             echo "::error::publish_approved must be true"
@@ -41,7 +44,9 @@ jobs:
             echo "::error::Workflow source SHA is not a full lowercase Git SHA"
             exit 1
           fi
-          echo "actor=$GITHUB_ACTOR"
+          echo "original_actor=$ORIGINAL_ACTOR"
+          echo "triggering_actor=$TRIGGERING_ACTOR"
+          echo "run_attempt=$RUN_ATTEMPT"
           echo "dispatched_at=$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           echo "publish_approved=$PUBLISH_APPROVED"
           echo "source_ref=$SOURCE_REF_NAME"
@@ -55,6 +60,7 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
+      pages: read
     steps:
       - name: Checkout exact workflow revision
         uses: actions/checkout@v6
@@ -113,7 +119,7 @@ jobs:
     name: Verify deployed root and cross-site contracts
     needs: deploy
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:

@@ -12,7 +12,8 @@ CP3 completed the one-time production cutover. The root personal site and
 Tokamak are live, their shared Person identity is connected, and the legacy root
 artifact remains recoverable.
 
-The root deployment workflow is still expressed as a cutover workflow:
+At proposal capture time, the root deployment workflow was still expressed as a
+cutover workflow:
 
 - `.github/workflows/pages.yml` accepts only `workflow_dispatch`;
 - its approval input is named `cp3_approved`;
@@ -24,7 +25,7 @@ gate. Implementation proceeds through reviewed pull requests; branch protection
 and production publication follow only after their prerequisite default-branch
 checks succeed.
 
-## Current operational baseline
+## Captured pre-implementation baseline
 
 ### Root personal site
 
@@ -115,9 +116,10 @@ A validation job fails visibly instead of silently skipping work when:
 - the selected ref is not the repository default branch;
 - the revision to be packaged is not the selected workflow revision.
 
-The actor, timestamp, input, source SHA, and workflow URL form the publication
-audit record. `publish_approved` authorizes deployment of an already reviewed
-revision; it never authorizes adding or inferring personal facts.
+The original actor, triggering actor, run attempt, timestamp, input, source SHA,
+and workflow URL form the publication audit record, including on a workflow
+rerun. `publish_approved` authorizes deployment of an already reviewed revision;
+it never authorizes adding or inferring personal facts.
 
 ### Release freshness marker
 
@@ -245,6 +247,8 @@ npm run check:live -- --base "$LIVE_BASE" --expected-sha "$GITHUB_SHA"
 The workflow is successful only when this final job passes. The live job runs
 after the artifact is already public, so the sequence is not a transactional
 deployment and a live-check failure requires explicit correction or rollback.
+The live-verification job reserves 30 minutes so the bounded release-marker
+preflight and bounded probe retries can finish with an aggregated result.
 
 Keep the `github-pages` concurrency group and `cancel-in-progress: false` so an
 in-flight publication is not cancelled. This setting does not guarantee FIFO
@@ -341,15 +345,20 @@ and complete live checker. Never force-push or reset `master`.
 
 Emergency legacy recovery retains:
 
-- source tag `legacy-al-folio-990479f` at
+- local source tag `legacy-al-folio-990479f` at
   `990479f86fc85ab72f15248b04b87bc04146aea2`;
 - legacy Pages artifact `gh-pages` commit
   `ff96ac64f9315ece3e5cf0b458ae42a4ccd2ffe7`.
 
-Changing Pages back to `gh-pages:/` requires explicit approval at the time of
-recovery, exact SHA and target confirmation, settings capture, and a
-recovery-specific live check. The recovery tag and branch remain intact after
-returning to workflow publishing.
+Emergency recovery requires explicit approval at the time of recovery, exact
+SHA and target confirmation, and a settings capture before changing anything.
+Set Pages to `build_type=legacy` with `source.branch=gh-pages` and
+`source.path=/`, then read back both the build type and source before running a
+recovery-specific live check. Returning to normal publishing requires restoring
+and reading back `build_type=workflow`, followed by a normal approved manual
+publication and complete live check. Stale `source=gh-pages:/` metadata by
+itself is not evidence that legacy publishing is active. The recovery tag and
+branch remain intact throughout.
 
 Tokamak rollback uses a reviewed revert to `main`; its normal deployment and
 `Verify deployed site` jobs must pass.

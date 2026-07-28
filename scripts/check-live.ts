@@ -1,5 +1,6 @@
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { inflateSync } from 'node:zlib';
 import { loadCatalogFromDisk } from '../src/lib/content/catalog.node';
 import { localizedPublicCatalog, type PublicOutput } from '../src/lib/content/public';
 import { canonicalRoutes } from '../src/lib/content/route-manifest';
@@ -206,6 +207,7 @@ function isSafeRequestRoute(route: string): boolean {
     route.startsWith('/') &&
     !route.startsWith('//') &&
     !route.includes('\\') &&
+    !/%(?:2e|2f|5c)/i.test(route) &&
     !route.split('/').includes('..') &&
     !/[?#]/.test(route)
   );
@@ -318,6 +320,33 @@ function collectStrings(value: unknown): string[] {
   if (Array.isArray(value)) return value.flatMap(collectStrings);
   if (value && typeof value === 'object') return Object.values(value).flatMap(collectStrings);
   return [];
+}
+
+function collectJsonKeysAndStrings(value: unknown): { keys: string[]; strings: string[] } {
+  if (typeof value === 'string') return { keys: [], strings: [value] };
+  if (Array.isArray(value)) {
+    return value.reduce(
+      (collected, entry) => {
+        const nested = collectJsonKeysAndStrings(entry);
+        collected.keys.push(...nested.keys);
+        collected.strings.push(...nested.strings);
+        return collected;
+      },
+      { keys: [] as string[], strings: [] as string[] }
+    );
+  }
+  if (value && typeof value === 'object') {
+    return Object.entries(value).reduce(
+      (collected, [key, entry]) => {
+        const nested = collectJsonKeysAndStrings(entry);
+        collected.keys.push(key, ...nested.keys);
+        collected.strings.push(...nested.strings);
+        return collected;
+      },
+      { keys: [] as string[], strings: [] as string[] }
+    );
+  }
+  return { keys: [], strings: [] };
 }
 
 function identityForRoute(route: string, locale: Locale, catalog: ContentCatalog): LocalizedIdentity {
@@ -753,20 +782,27 @@ function validateLocalizedDataProbe(probe: LocalizedDataProbe, response: Respons
   if (!contentType.includes('application/json')) {
     failures.push(`expected application/json; received ${contentType || 'missing content-type'}`);
   }
+  let decoded = { keys: [] as string[], strings: [] as string[] };
   try {
-    JSON.parse(source);
+    decoded = collectJsonKeysAndStrings(JSON.parse(source) as unknown);
   } catch {
     failures.push('response is not valid JSON');
   }
+  const decodedText = [...decoded.keys, ...decoded.strings];
   for (const forbidden of rootForbiddenFragments) {
-    if (source.includes(forbidden)) failures.push(`exposes forbidden template/private text ${forbidden}`);
+    if (source.includes(forbidden) || decodedText.some((value) => value.includes(forbidden))) {
+      failures.push(`exposes forbidden template/private text ${forbidden}`);
+    }
   }
   for (const key of internalCatalogFields) {
-    if (artifactContainsSerializedProperty(source, key, '.json'))
+    if (artifactContainsSerializedProperty(source, key, '.json') || decoded.keys.includes(key)) {
       failures.push(`exposes internal catalog field ${key}`);
+    }
   }
   for (const value of probe.unselectedContent) {
-    if (source.includes(value)) failures.push(`exposes unselected locale content ${JSON.stringify(value)}`);
+    if (source.includes(value) || decodedText.some((decodedValue) => decodedValue.includes(value))) {
+      failures.push(`exposes unselected locale content ${JSON.stringify(value)}`);
+    }
   }
   if (failures.length > 0) throw new Error(`${probe.pageRoute} data payload: ${failures.join('; ')}`);
 }
@@ -807,6 +843,17 @@ function validateNotFound(probe: NotFoundProbe, response: Response, html: string
   }
 }
 
+function pngCrc32(bytes: Uint8Array): number {
+  let crc = 0xffffffff;
+  for (const byte of bytes) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit += 1) {
+      crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
 function validateSocialCard(response: Response, body: Uint8Array): void {
   if (response.status !== 200) throw new Error(`social card expected HTTP 200; received ${response.status}`);
   const contentType = response.headers.get('content-type')?.toLowerCase() ?? '';
@@ -817,10 +864,88 @@ function validateSocialCard(response: Response, body: Uint8Array): void {
     throw new Error('social card is not a valid PNG');
   }
   const view = new DataView(body.buffer, body.byteOffset, body.byteLength);
+  let offset = 8;
+  let firstChunk = true;
+  let sawImageData = false;
+  let sawEnd = false;
+  const imageDataChunks: Buffer[] = [];
+  while (offset < body.length) {
+    if (offset + 12 > body.length) throw new Error('social card PNG contains a truncated chunk');
+    const length = view.getUint32(offset);
+    const type = Buffer.from(body.subarray(offset + 4, offset + 8)).toString('ascii');
+    const dataStart = offset + 8;
+    const dataEnd = dataStart + length;
+    const nextOffset = dataEnd + 4;
+    if (!/^[A-Za-z]{4}$/.test(type) || nextOffset > body.length) {
+      throw new Error('social card PNG contains an invalid chunk');
+    }
+    const expectedCrc = view.getUint32(dataEnd);
+    const actualCrc = pngCrc32(body.subarray(offset + 4, dataEnd));
+    if (actualCrc !== expectedCrc) throw new Error(`social card PNG ${type} chunk has an invalid CRC`);
+    if (firstChunk && (type !== 'IHDR' || length !== 13)) {
+      throw new Error('social card PNG must start with a 13-byte IHDR chunk');
+    }
+    if (!firstChunk && type === 'IHDR') throw new Error('social card PNG contains more than one IHDR chunk');
+    if (type === 'IDAT') {
+      sawImageData = true;
+      imageDataChunks.push(Buffer.from(body.subarray(dataStart, dataEnd)));
+    }
+    if (type === 'IEND') {
+      if (length !== 0 || nextOffset !== body.length) {
+        throw new Error('social card PNG has an invalid IEND chunk');
+      }
+      sawEnd = true;
+    }
+    firstChunk = false;
+    offset = nextOffset;
+  }
+  if (!sawImageData || !sawEnd) throw new Error('social card PNG is missing IDAT or IEND');
   const width = view.getUint32(16);
   const height = view.getUint32(20);
   if (width !== 1731 || height !== 909) {
     throw new Error(`unexpected social-card dimensions: ${width}x${height}`);
+  }
+  const bitDepth = body[24];
+  const colorType = body[25];
+  const compressionMethod = body[26];
+  const filterMethod = body[27];
+  const interlaceMethod = body[28];
+  const channels = new Map([
+    [0, 1],
+    [2, 3],
+    [3, 1],
+    [4, 2],
+    [6, 4]
+  ]).get(colorType);
+  const allowedBitDepths: Record<number, number[]> = {
+    0: [1, 2, 4, 8, 16],
+    2: [8, 16],
+    3: [1, 2, 4, 8],
+    4: [8, 16],
+    6: [8, 16]
+  };
+  if (
+    !channels ||
+    !allowedBitDepths[colorType]?.includes(bitDepth) ||
+    compressionMethod !== 0 ||
+    filterMethod !== 0 ||
+    interlaceMethod !== 0
+  ) {
+    throw new Error('social card PNG uses an unsupported image encoding');
+  }
+  const rowBytes = Math.ceil((width * channels * bitDepth) / 8);
+  const expectedInflatedLength = height * (rowBytes + 1);
+  let inflated: Buffer;
+  try {
+    inflated = inflateSync(Buffer.concat(imageDataChunks), { maxOutputLength: expectedInflatedLength + 1 });
+  } catch {
+    throw new Error('social card PNG contains invalid compressed image data');
+  }
+  if (inflated.length !== expectedInflatedLength) {
+    throw new Error('social card PNG decompressed image length is invalid');
+  }
+  for (let row = 0; row < height; row += 1) {
+    if (inflated[row * (rowBytes + 1)] > 4) throw new Error('social card PNG contains an invalid row filter');
   }
 }
 
@@ -912,10 +1037,32 @@ function validateTokamakSitemap(probe: TokamakSitemapProbe, response: Response, 
   if (!contentType.includes('xml'))
     throw new Error(`Tokamak sitemap has unexpected content-type ${contentType || 'missing'}`);
   const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
+  const locElements = [...xml.matchAll(/<(?:[^<>\s/:]+:)?loc\b/giu)].length;
+  if (locElements !== urls.length) {
+    throw new Error('Tokamak sitemap contains an unsupported or malformed loc element');
+  }
   if (urls.length !== new Set(urls).size) throw new Error('Tokamak sitemap contains duplicate URLs');
   for (const url of urls) {
-    if (!url.startsWith(`${siteOrigin}/tokamak/`))
+    let parsed: URL;
+    try {
+      parsed = new URL(url);
+    } catch {
+      throw new Error(`Tokamak sitemap contains an invalid URL: ${url}`);
+    }
+    if (
+      parsed.origin !== siteOrigin ||
+      parsed.username ||
+      parsed.password ||
+      parsed.port ||
+      parsed.search ||
+      parsed.hash ||
+      parsed.href !== url ||
+      !parsed.pathname.startsWith(tokamakBasePath) ||
+      url.includes('&') ||
+      /%(?:2e|2f|5c)/i.test(url)
+    ) {
       throw new Error(`Tokamak sitemap escaped its controlled base: ${url}`);
+    }
   }
   const required = probe.requiredRoutes.map((route) => `${siteOrigin}${route}`);
   const missing = required.filter((url) => !urls.includes(url));
