@@ -1,0 +1,22 @@
+id: hoonseok-yoon
+canonicalUrl: https://hoonseokyoon.github.io/
+editorialStatus: published
+sourceLocale: ko
+content:
+  ko:
+    name: Hoonseok Yoon
+    headline: 개인 이력과 프로젝트 기록
+    summary: 확인된 이력, 프로젝트, 산출물과 그 과정에서 축적한 지식을 연결해 기록합니다.
+  en:
+    name: Hoonseok Yoon
+    headline: A record of personal history and projects
+    summary: A connected record of verified history, projects, outputs, and the knowledge built along the way.
+sameAs:
+  - https://github.com/hoonseokyoon
+contacts: []
+evidence:
+  - kind: public-profile
+    url: https://github.com/hoonseokyoon
+    checkedAt: 2026-07-28
+  - kind: user-confirmed
+    checkedAt: 2026-07-28

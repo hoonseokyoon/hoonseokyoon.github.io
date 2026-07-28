@@ -1,0 +1,31 @@
+id: tokamak
+editorialStatus: published
+lifecycle: active
+period:
+  start: 2025-10-06
+  end: present
+featuredRank: 1
+sourceLocale: ko
+content:
+  ko:
+    title: Tokamak
+    summary: 공부 글과 기술 설명을 Project → SubProject → LearningNode 구조로 연결하는 이중 언어 지식 사이트입니다.
+    role: 기획, 정보 구조 설계, 개발 및 운영
+    contributions: []
+    outcomes: []
+  en:
+    title: Tokamak
+    summary: A bilingual knowledge site connecting study notes and technical explanations through a Project → SubProject → LearningNode structure.
+    role: Planning, information architecture, development, and maintenance
+    contributions: []
+    outcomes: []
+links:
+  - kind: website
+    url: https://hoonseokyoon.github.io/tokamak/
+knowledgeLinks: []
+evidence:
+  - kind: canonical-output
+    url: https://hoonseokyoon.github.io/tokamak/
+    checkedAt: 2026-07-28
+  - kind: user-confirmed
+    checkedAt: 2026-07-28

@@ -1,0 +1,10 @@
+# Legacy public paths that were not present in the 80-path sitemap snapshot.
+# Keep this list explicit so route-parity checks also cover infrastructure,
+# the removed feed, and standalone al-folio demonstrations.
+/404.html
+/robots.txt
+/sitemap.xml
+/feed.xml
+/assets/html/relativity.html
+/assets/jupyter/blog.ipynb.html
+/assets/plotly/demo.html

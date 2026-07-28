@@ -1,0 +1,23 @@
+id: tokamak-project
+kind: project
+editorialStatus: published
+period:
+  start: 2025-10-06
+sourceLocale: ko
+content:
+  ko:
+    title: Tokamak 프로젝트 시작
+    summary: Tokamak 프로젝트를 시작했습니다.
+  en:
+    title: Starting the Tokamak project
+    summary: Started the Tokamak project.
+projectIds:
+  - tokamak
+outputIds: []
+knowledgeLinks: []
+evidence:
+  - kind: canonical-output
+    url: https://hoonseokyoon.github.io/tokamak/
+    checkedAt: 2026-07-28
+  - kind: user-confirmed
+    checkedAt: 2026-07-28
