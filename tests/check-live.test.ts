@@ -335,6 +335,24 @@ describe('catalog and policy-derived plan', () => {
     expect(sitemapProbe?.requiredRoutes).toEqual(plan.tokamakRoutes);
   });
 
+  it('does not require a Root Project backlink for an ordinary non-reciprocal Project knowledge link', () => {
+    const catalog = structuredClone(loadCatalogFromDisk());
+    const route = '/tokamak/ko/blog/linear-regression-computation-techniques/';
+    catalog.projects[0].knowledgeLinks = [
+      {
+        kind: 'article',
+        relation: 'background',
+        urls: { ko: `https://hoonseokyoon.github.io${route}` }
+      }
+    ];
+
+    const plan = createLivePlan(expectedSha, catalog);
+    const probe = plan.probes.find(
+      (candidate): candidate is TokamakPageProbe => candidate.kind === 'tokamak-page' && candidate.route === route
+    );
+    expect(probe).toMatchObject({ expectedRootBacklinks: [], forbiddenRootBacklinks: [] });
+  });
+
   it('refuses a non-canonical published knowledge target before issuing live requests', () => {
     const catalog = structuredClone(loadCatalogFromDisk());
     catalog.projects[0].knowledgeLinks = [

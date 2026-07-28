@@ -430,7 +430,7 @@ function publishedKnowledgeTargets(catalog: ContentCatalog): PublishedKnowledgeT
           expectedRootBacklinks: new Set<string>(),
           forbiddenRootBacklinks: new Set<string>()
         };
-        if (projectId) {
+        if (projectId && link.reciprocal) {
           const oppositeLocale = locale === 'ko' ? 'en' : 'ko';
           target.expectedRootBacklinks.add(`${siteOrigin}/${locale}/projects/${projectId}/`);
           target.forbiddenRootBacklinks.add(`${siteOrigin}/${oppositeLocale}/projects/${projectId}/`);

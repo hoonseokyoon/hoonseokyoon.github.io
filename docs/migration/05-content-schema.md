@@ -301,6 +301,25 @@ Relations are:
 | `produced`   | The work produced the linked knowledge artifact                        |
 | `documents`  | The knowledge resource documents or reviews the personal work          |
 
+A Project-owned link may opt into a verified reverse edge only when the target
+is also a bilingual Tokamak Project:
+
+```yaml
+knowledgeLinks:
+  - kind: project
+    relation: produced
+    reciprocal: true
+    urls:
+      ko: https://hoonseokyoon.github.io/tokamak/ko/projects/example/
+      en: https://hoonseokyoon.github.io/tokamak/en/projects/example/
+```
+
+`reciprocal: true` is invalid on TimelineEvent and Output records, on article or
+category targets, or without both locale URLs. When absent, a knowledge link is
+an ordinary one-way reference and the Root live audit does not require the
+Tokamak target to link back. The field is an internal release contract and is
+not included in public page data.
+
 At least one locale URL is required. If both locales exist, the suffix after
 `/ko/` and `/en/` must match. Links are explicit canonical HTTPS URLs; the root
 build validates shape but does not fetch Tokamak. Canonical here also excludes
@@ -335,7 +354,9 @@ TimelineEvent / Project / Output
 ```
 
 - Project backlinks to TimelineEvents and Outputs are derived.
-- Tokamak backlinks are optional and never required for a root build.
+- Tokamak backlinks are optional and never required for an ordinary root build;
+  the post-deployment live audit requires them only for an explicit
+  `reciprocal: true` Project relation.
 - No runtime API, Git submodule, generated shared manifest, or cross-repository
   build fetch is introduced.
 

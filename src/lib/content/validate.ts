@@ -59,13 +59,23 @@ function validateReferences(
   }
 }
 
-function validateKnowledgeLink(issues: ValidationIssue[], path: string, link: KnowledgeLink) {
+function validateKnowledgeLink(issues: ValidationIssue[], path: string, link: KnowledgeLink, allowReciprocal = false) {
   const slug = '[a-z0-9]+(?:-[a-z0-9]+)*';
   const patterns: Record<KnowledgeLink['kind'], RegExp> = {
     article: new RegExp(`^/tokamak/(ko|en)/blog/${slug}/$`),
     project: new RegExp(`^/tokamak/(ko|en)/projects/${slug}/$`),
     category: new RegExp(`^/tokamak/(ko|en)/categories/${slug}/$`)
   };
+
+  if (link.reciprocal && !allowReciprocal) {
+    add(issues, 'reciprocal-owner', path, 'Only a Project knowledge link can require a reciprocal backlink');
+  }
+  if (link.reciprocal && link.kind !== 'project') {
+    add(issues, 'reciprocal-kind', path, 'A reciprocal knowledge link must target a Tokamak Project');
+  }
+  if (link.reciprocal && (!link.urls.ko || !link.urls.en)) {
+    add(issues, 'reciprocal-locales', path, 'A reciprocal knowledge link requires matching KO and EN targets');
+  }
 
   for (const locale of ['ko', 'en'] as const) {
     const raw = link.urls[locale];
@@ -225,7 +235,7 @@ export function validateCatalog(catalog: ContentCatalog, options: ValidationOpti
     validatePeriod(issues, `${path}.period`, project.period.start, project.period.end);
     validateProjectLifecycle(issues, path, project);
     project.knowledgeLinks.forEach((link, linkIndex) =>
-      validateKnowledgeLink(issues, `${path}.knowledgeLinks[${linkIndex}]`, link)
+      validateKnowledgeLink(issues, `${path}.knowledgeLinks[${linkIndex}]`, link, true)
     );
     validateRecordLinks(
       issues,

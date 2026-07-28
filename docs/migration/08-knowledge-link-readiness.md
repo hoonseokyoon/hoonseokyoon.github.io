@@ -12,6 +12,7 @@ publishing a relationship. The first approved relationship now uses that path:
 
 - root owner: personal Project `tokamak`;
 - relation: `produced`;
+- reciprocal release contract: `reciprocal: true`;
 - canonical Tokamak target: the Ordinary Differential Equations SubProject;
 - KO label: `상미분방정식 6부작`;
 - EN label: `Six-part ODE series`; and
@@ -56,6 +57,9 @@ bounded post-deployment live audit.
   data contains only the requested locale target and label.
 - The Root Project detail renders one named related-knowledge panel; an empty
   `knowledgeLinks` array still renders no panel on other record surfaces.
+- Only a Project-owned, bilingual Tokamak Project link marked
+  `reciprocal: true` creates a reverse-link expectation; ordinary Project links
+  to articles or categories remain valid one-way references.
 - The Tokamak ODE page renders one static, same-tab anchor to the matching Root
   Project and does not expose the opposite-locale Project URL.
 - Both links remain usable without JavaScript and at a 320-pixel viewport.

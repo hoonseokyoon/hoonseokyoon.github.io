@@ -41,6 +41,7 @@ describe('personal content catalog', () => {
       {
         kind: 'project',
         relation: 'produced',
+        reciprocal: true,
         urls: {
           ko: 'https://hoonseokyoon.github.io/tokamak/ko/projects/ordinary-differential-equations/',
           en: 'https://hoonseokyoon.github.io/tokamak/en/projects/ordinary-differential-equations/'
@@ -66,6 +67,8 @@ describe('personal content catalog', () => {
     ]);
     expect(JSON.stringify(ko)).not.toContain('/tokamak/en/projects/ordinary-differential-equations/');
     expect(JSON.stringify(en)).not.toContain('/tokamak/ko/projects/ordinary-differential-equations/');
+    expect(JSON.stringify(ko)).not.toContain('reciprocal');
+    expect(JSON.stringify(en)).not.toContain('reciprocal');
   });
 
   it('accepts the complete synthetic release fixture', () => {
@@ -109,7 +112,14 @@ describe('personal content catalog', () => {
         label: 'Synthetic output notes'
       }
     ]);
-    for (const internalKey of ['editorialStatus', 'sourceLocale', 'evidence', 'checkedAt', 'contributors']) {
+    for (const internalKey of [
+      'editorialStatus',
+      'sourceLocale',
+      'evidence',
+      'checkedAt',
+      'contributors',
+      'reciprocal'
+    ]) {
       expect(serialized).not.toContain(`"${internalKey}"`);
     }
     expect(serialized).not.toContain('A personal record connecting time, projects, and outputs');
@@ -194,6 +204,25 @@ describe('personal content catalog', () => {
     const broken = structuredClone(fixtureCatalog);
     broken.timeline[0].knowledgeLinks.push(structuredClone(broken.timeline[0].knowledgeLinks[0]));
     expect(validateCatalog(broken).map((issue) => issue.code)).toContain('duplicate-knowledge-link');
+  });
+
+  it('limits reciprocal backlink requirements to bilingual Project targets owned by Projects', () => {
+    const wrongKind = structuredClone(fixtureCatalog);
+    wrongKind.projects[0].knowledgeLinks[0].reciprocal = true;
+    expect(validateCatalog(wrongKind).map((issue) => issue.code)).toContain('reciprocal-kind');
+
+    const missingLocale = structuredClone(fixtureCatalog);
+    missingLocale.projects[0].knowledgeLinks[0] = {
+      kind: 'project',
+      relation: 'background',
+      reciprocal: true,
+      urls: { ko: 'https://hoonseokyoon.github.io/tokamak/ko/projects/fixture-knowledge/' }
+    };
+    expect(validateCatalog(missingLocale).map((issue) => issue.code)).toContain('reciprocal-locales');
+
+    const wrongOwner = structuredClone(fixtureCatalog);
+    wrongOwner.timeline[0].knowledgeLinks[0].reciprocal = true;
+    expect(validateCatalog(wrongOwner).map((issue) => issue.code)).toContain('reciprocal-owner');
   });
 
   it('rejects non-canonical or weakly shaped Tokamak knowledge URLs', () => {

@@ -224,8 +224,9 @@ Controlled cross-site verification also requires:
   `https://hoonseokyoon.github.io/#person`;
 - every published Root `knowledgeLinks` target to be included in the controlled
   Tokamak page and sitemap plan; and
-- a Tokamak target owned by a Root Project relation to contain exactly one
-  same-locale Root Project backlink and no opposite-locale Project backlink.
+- a bilingual Tokamak Project target explicitly marked `reciprocal: true` by a
+  Root Project relation to contain exactly one same-locale Root Project backlink
+  and no opposite-locale Project backlink.
 
 The checker does not crawl unrelated third-party links or make an unrelated
 external service outage fail a root release.

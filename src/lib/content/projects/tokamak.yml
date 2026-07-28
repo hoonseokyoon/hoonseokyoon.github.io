@@ -25,6 +25,7 @@ links:
 knowledgeLinks:
   - kind: project
     relation: produced
+    reciprocal: true
     urls:
       ko: https://hoonseokyoon.github.io/tokamak/ko/projects/ordinary-differential-equations/
       en: https://hoonseokyoon.github.io/tokamak/en/projects/ordinary-differential-equations/

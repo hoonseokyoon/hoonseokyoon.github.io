@@ -3,7 +3,8 @@ export const internalCatalogFields = [
   'sourceLocale',
   'evidence',
   'checkedAt',
-  'contributors'
+  'contributors',
+  'reciprocal'
 ] as const;
 
 function escapeRegExp(value: string): string {
