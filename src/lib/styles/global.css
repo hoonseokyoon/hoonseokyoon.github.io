@@ -287,7 +287,7 @@ dl {
 .profile-links,
 .record-links,
 .secondary-links,
-.knowledge-panel ul {
+.knowledge-links ul {
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem 1rem;
@@ -752,12 +752,12 @@ dl {
   font-weight: 620;
 }
 
-.knowledge-panel ul {
+.knowledge-links ul {
   display: grid;
   gap: 1rem;
 }
 
-.knowledge-panel li span {
+.knowledge-links li span {
   display: block;
   color: var(--color-text-subtle);
   font-size: 0.74rem;
@@ -765,10 +765,25 @@ dl {
   text-transform: uppercase;
 }
 
-.knowledge-panel li a {
+.knowledge-links li a {
   overflow-wrap: anywhere;
   font-size: 0.9rem;
   font-weight: 650;
+}
+
+.record-knowledge {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.record-knowledge :is(h3, h4) {
+  margin: 0 0 0.75rem;
+  font-size: 0.94rem;
+}
+
+.record-knowledge ul {
+  gap: 0.7rem;
 }
 
 .content-gate,

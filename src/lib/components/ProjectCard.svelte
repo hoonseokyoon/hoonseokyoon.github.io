@@ -29,7 +29,9 @@
     </dl>
     <div class="card-footer">
       <span>{projectOutputs.length} {labels.outputs.toLowerCase()}</span>
-      <span>{project.knowledgeLinks.length} {labels.knowledge.toLowerCase()}</span>
+      {#if project.knowledgeLinks.length}
+        <span>{project.knowledgeLinks.length} {labels.knowledge.toLowerCase()}</span>
+      {/if}
       <span class="card-cta">{labels.openProject} →</span>
     </div>
   </a>

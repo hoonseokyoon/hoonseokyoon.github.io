@@ -60,17 +60,35 @@ function validateReferences(
 }
 
 function validateKnowledgeLink(issues: ValidationIssue[], path: string, link: KnowledgeLink) {
+  const slug = '[a-z0-9]+(?:-[a-z0-9]+)*';
   const patterns: Record<KnowledgeLink['kind'], RegExp> = {
-    article: /^\/tokamak\/(ko|en)\/blog\/[^/]+\/$/,
-    project: /^\/tokamak\/(ko|en)\/projects\/[^/]+\/$/,
-    category: /^\/tokamak\/(ko|en)\/categories\/[^/]+\/$/
+    article: new RegExp(`^/tokamak/(ko|en)/blog/${slug}/$`),
+    project: new RegExp(`^/tokamak/(ko|en)/projects/${slug}/$`),
+    category: new RegExp(`^/tokamak/(ko|en)/categories/${slug}/$`)
   };
 
   for (const locale of ['ko', 'en'] as const) {
     const raw = link.urls[locale];
     if (!raw) continue;
-    const url = new URL(raw);
-    if (url.origin !== siteOrigin || !patterns[link.kind].test(url.pathname)) {
+    let url: URL;
+    try {
+      url = new URL(raw);
+    } catch {
+      add(issues, 'invalid-knowledge-url', `${path}.urls.${locale}`, `Invalid ${link.kind} URL: ${raw}`);
+      continue;
+    }
+    const canonical =
+      url.protocol === 'https:' &&
+      url.origin === siteOrigin &&
+      !url.username &&
+      !url.password &&
+      !url.port &&
+      !url.search &&
+      !url.hash &&
+      !/[?#]/.test(raw) &&
+      url.href === raw &&
+      !/%(?:2e|2f|5c)/i.test(raw);
+    if (!canonical || !patterns[link.kind].test(url.pathname)) {
       add(issues, 'invalid-knowledge-url', `${path}.urls.${locale}`, `Unexpected ${link.kind} URL: ${raw}`);
     }
     if (!url.pathname.startsWith(`/tokamak/${locale}/`)) {
@@ -79,10 +97,14 @@ function validateKnowledgeLink(issues: ValidationIssue[], path: string, link: Kn
   }
 
   if (link.urls.ko && link.urls.en) {
-    const koSuffix = new URL(link.urls.ko).pathname.replace('/tokamak/ko/', '');
-    const enSuffix = new URL(link.urls.en).pathname.replace('/tokamak/en/', '');
-    if (koSuffix !== enSuffix) {
-      add(issues, 'knowledge-pair', path, 'KO and EN knowledge URLs must have matching suffixes');
+    try {
+      const koSuffix = new URL(link.urls.ko).pathname.replace('/tokamak/ko/', '');
+      const enSuffix = new URL(link.urls.en).pathname.replace('/tokamak/en/', '');
+      if (koSuffix !== enSuffix) {
+        add(issues, 'knowledge-pair', path, 'KO and EN knowledge URLs must have matching suffixes');
+      }
+    } catch {
+      // Individual URL issues are reported above.
     }
   }
 }
@@ -187,6 +209,7 @@ export function validateCatalog(catalog: ContentCatalog, options: ValidationOpti
     event.knowledgeLinks.forEach((link, linkIndex) =>
       validateKnowledgeLink(issues, `${path}.knowledgeLinks[${linkIndex}]`, link)
     );
+    validateRecordLinks(issues, path, [], event.knowledgeLinks);
   });
 
   const featuredRanks = catalog.projects.flatMap((project) =>

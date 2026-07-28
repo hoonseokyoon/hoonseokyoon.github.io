@@ -112,6 +112,10 @@
         </div>
       </dl>
     </section>
-    <KnowledgePanel links={project.knowledgeLinks} lang={data.lang} />
+    <KnowledgePanel
+      links={project.knowledgeLinks}
+      lang={data.lang}
+      headingId={`project-${project.id}-knowledge-title`}
+    />
   </aside>
 </div>

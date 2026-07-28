@@ -45,6 +45,9 @@ The documents are deliberately separated by decision responsibility:
 9. [`evidence/cp4-settings-readback-2026-07-28.json`](evidence/cp4-settings-readback-2026-07-28.json)
    preserves the normalized, non-secret branch-protection, Pages, and
    environment-policy readback captured at CP4 completion.
+10. [`08-knowledge-link-readiness.md`](08-knowledge-link-readiness.md) records
+    the post-CP4 public-projection, UI, and live-audit capability boundary before
+    any real personal-record relationship is published.
 
 ## Safety boundary after CP2
 
@@ -95,3 +98,11 @@ root publication deployed its exact merge SHA and passed all 115 live probes
 without retry. See `07-post-cutover-operations.md` and the linked settings
 snapshot for the permanent evidence. New personal facts remain gated by a
 separate explicit content approval.
+
+Post-CP4 knowledge-link readiness now covers published TimelineEvent, Project,
+and Output projection, conditional UI, and catalog-derived release probing
+without runtime or ordinary-build coupling to Tokamak. Production
+`knowledgeLinks` remain empty: the first target, relationship, and public label
+require the next explicit content checkpoint. The Tokamak ODE series is a review
+candidate only, not an approved or published relationship. See
+`08-knowledge-link-readiness.md` for the exact boundary.

@@ -4,6 +4,7 @@
   import type { PublicOutput, PublicProject } from '$lib/content/public';
   import type { Locale } from '$lib/site';
   import { ui } from '$lib/ui';
+  import KnowledgePanel from './KnowledgePanel.svelte';
 
   let { outputs, projects, lang }: { outputs: PublicOutput[]; projects: PublicProject[]; lang: Locale } = $props();
   const labels = $derived(ui[lang]);
@@ -48,6 +49,13 @@
             {/each}
           </ul>
         {/if}
+        <KnowledgePanel
+          links={output.knowledgeLinks}
+          {lang}
+          headingId={`output-${output.id}-knowledge-title`}
+          headingLevel={4}
+          variant="compact"
+        />
       </article>
     </li>
   {/each}

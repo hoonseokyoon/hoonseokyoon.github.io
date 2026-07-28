@@ -45,7 +45,17 @@ export const fixtureCatalog: ContentCatalog = {
       },
       projectIds: ['fixture-project'],
       outputIds: ['fixture-software'],
-      knowledgeLinks: [],
+      knowledgeLinks: [
+        {
+          kind: 'project',
+          relation: 'applied',
+          urls: {
+            ko: 'https://hoonseokyoon.github.io/tokamak/ko/projects/fixture-knowledge-project/',
+            en: 'https://hoonseokyoon.github.io/tokamak/en/projects/fixture-knowledge-project/'
+          },
+          label: { ko: '합성 지식 프로젝트', en: 'Synthetic knowledge project' }
+        }
+      ],
       evidence: [{ kind: 'user-confirmed', checkedAt: '2026-07-28' }]
     }
   ],
@@ -112,7 +122,16 @@ export const fixtureCatalog: ContentCatalog = {
         { kind: 'repository', url: 'https://example.test/repository', primary: true },
         { kind: 'website', url: 'https://example.test/demo', primary: false }
       ],
-      knowledgeLinks: [],
+      knowledgeLinks: [
+        {
+          kind: 'category',
+          relation: 'documents',
+          urls: {
+            en: 'https://hoonseokyoon.github.io/tokamak/en/categories/fixture-output-notes/'
+          },
+          label: { en: 'Synthetic output notes' }
+        }
+      ],
       evidence: [{ kind: 'user-confirmed', checkedAt: '2026-07-28' }]
     }
   ]

@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
+import { loadCatalogFromDisk } from '../src/lib/content/catalog.node';
 import {
   assertExpectedSha,
   createLivePlan,
@@ -262,6 +263,71 @@ describe('catalog and policy-derived plan', () => {
       'tokamak-page': 5,
       'tokamak-sitemap': 1
     });
+  });
+
+  it('deduplicates every published catalog knowledge target into page and sitemap probes', () => {
+    const catalog = structuredClone(loadCatalogFromDisk());
+    const projectLink = {
+      kind: 'project' as const,
+      relation: 'produced' as const,
+      urls: {
+        ko: 'https://hoonseokyoon.github.io/tokamak/ko/projects/ordinary-differential-equations/',
+        en: 'https://hoonseokyoon.github.io/tokamak/en/projects/ordinary-differential-equations/'
+      }
+    };
+    catalog.timeline[0].knowledgeLinks = [projectLink];
+    catalog.projects[0].knowledgeLinks = [structuredClone(projectLink)];
+    catalog.outputs[0].knowledgeLinks = [
+      {
+        kind: 'category',
+        relation: 'documents',
+        urls: { en: 'https://hoonseokyoon.github.io/tokamak/en/categories/statistics/' }
+      }
+    ];
+    catalog.timeline.push({
+      ...structuredClone(catalog.timeline[0]),
+      id: 'draft-knowledge-target',
+      editorialStatus: 'draft',
+      knowledgeLinks: [
+        {
+          kind: 'article',
+          relation: 'background',
+          urls: {
+            ko: 'https://hoonseokyoon.github.io/tokamak/ko/blog/linear-regression-computation-techniques/',
+            en: 'https://hoonseokyoon.github.io/tokamak/en/blog/linear-regression-computation-techniques/'
+          }
+        }
+      ]
+    });
+
+    const plan = createLivePlan(expectedSha, catalog);
+    expect(plan.tokamakRoutes).toEqual(
+      expect.arrayContaining([
+        '/tokamak/ko/projects/ordinary-differential-equations/',
+        '/tokamak/en/projects/ordinary-differential-equations/',
+        '/tokamak/en/categories/statistics/'
+      ])
+    );
+    expect(plan.tokamakRoutes).not.toContain('/tokamak/ko/blog/linear-regression-computation-techniques/');
+    expect(plan.tokamakRoutes).toHaveLength(8);
+
+    const sitemapProbe = plan.probes.find((probe) => probe.kind === 'tokamak-sitemap');
+    expect(sitemapProbe?.requiredRoutes).toEqual(plan.tokamakRoutes);
+  });
+
+  it('refuses a non-canonical published knowledge target before issuing live requests', () => {
+    const catalog = structuredClone(loadCatalogFromDisk());
+    catalog.projects[0].knowledgeLinks = [
+      {
+        kind: 'article',
+        relation: 'background',
+        urls: {
+          ko: 'https://hoonseokyoon.github.io/tokamak/ko/blog/fixture-knowledge/?source=root'
+        }
+      }
+    ];
+
+    expect(() => createLivePlan(expectedSha, catalog)).toThrow(/canonical controlled Tokamak route/);
   });
 });
 

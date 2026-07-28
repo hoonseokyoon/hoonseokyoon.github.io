@@ -48,6 +48,14 @@ describe('personal content catalog', () => {
 
     expect(ko.person?.content.headline).toBe('시간, 프로젝트, 산출물을 연결하는 개인 기록');
     expect(ko.outputs[0]).toMatchObject({ locale: 'en', isFallback: true });
+    expect(ko.timeline[0].knowledgeLinks).toEqual([
+      {
+        relation: 'applied',
+        href: 'https://hoonseokyoon.github.io/tokamak/ko/projects/fixture-knowledge-project/',
+        locale: 'ko',
+        label: '합성 지식 프로젝트'
+      }
+    ]);
     expect(ko.projects[0].knowledgeLinks).toEqual([
       {
         relation: 'background',
@@ -56,11 +64,21 @@ describe('personal content catalog', () => {
         label: '합성 배경 지식'
       }
     ]);
+    expect(ko.outputs[0].knowledgeLinks).toEqual([
+      {
+        relation: 'documents',
+        href: 'https://hoonseokyoon.github.io/tokamak/en/categories/fixture-output-notes/',
+        locale: 'en',
+        label: 'Synthetic output notes'
+      }
+    ]);
     for (const internalKey of ['editorialStatus', 'sourceLocale', 'evidence', 'checkedAt', 'contributors']) {
       expect(serialized).not.toContain(`"${internalKey}"`);
     }
     expect(serialized).not.toContain('A personal record connecting time, projects, and outputs');
     expect(serialized).not.toContain('Synthetic project for route and content-contract testing');
+    expect(serialized).not.toContain('Synthetic knowledge project');
+    expect(serialized).not.toContain('/tokamak/en/projects/fixture-knowledge-project/');
   });
 
   it('maps localized Outputs to the approved stable structured-data contract', () => {
@@ -133,6 +151,35 @@ describe('personal content catalog', () => {
     const broken = structuredClone(fixtureCatalog);
     broken.projects[0].knowledgeLinks[0].urls.en = 'https://hoonseokyoon.github.io/tokamak/en/blog/different-slug/';
     expect(validateCatalog(broken).map((issue) => issue.code)).toContain('knowledge-pair');
+  });
+
+  it('rejects duplicate TimelineEvent knowledge links', () => {
+    const broken = structuredClone(fixtureCatalog);
+    broken.timeline[0].knowledgeLinks.push(structuredClone(broken.timeline[0].knowledgeLinks[0]));
+    expect(validateCatalog(broken).map((issue) => issue.code)).toContain('duplicate-knowledge-link');
+  });
+
+  it('rejects non-canonical or weakly shaped Tokamak knowledge URLs', () => {
+    const invalidUrls = [
+      'https://user:pass@hoonseokyoon.github.io/tokamak/ko/blog/fixture-knowledge/',
+      'https://hoonseokyoon.github.io:443/tokamak/ko/blog/fixture-knowledge/',
+      'https://hoonseokyoon.github.io/tokamak/ko/blog/fixture-knowledge/?',
+      'https://hoonseokyoon.github.io/tokamak/ko/blog/fixture-knowledge/#',
+      'https://hoonseokyoon.github.io/tokamak/ko/blog/fixture-knowledge/?source=root',
+      'https://hoonseokyoon.github.io/tokamak/ko/blog/fixture-knowledge/#section',
+      'https://hoonseokyoon.github.io/tokamak/ko/blog/Fixture-Knowledge/',
+      'https://hoonseokyoon.github.io/tokamak/ko/blog/%66ixture-knowledge/',
+      'https://hoonseokyoon.github.io/tokamak/ko/blog/section/../fixture-knowledge/'
+    ];
+
+    for (const url of invalidUrls) {
+      const broken = structuredClone(fixtureCatalog);
+      broken.projects[0].knowledgeLinks[0].urls.ko = url;
+      expect(
+        validateCatalog(broken).map((issue) => issue.code),
+        url
+      ).toContain('invalid-knowledge-url');
+    }
   });
 
   it('requires explicit user approval for every published record', () => {
