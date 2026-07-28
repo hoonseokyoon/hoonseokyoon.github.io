@@ -415,6 +415,13 @@ Tokamak `main` with the same contract:
 - force pushes and deletion disabled;
 - admin enforcement disabled for the approved emergency owner bypass.
 
+The normalized, allowlisted REST response fields captured at
+`2026-07-28T06:43:11Z` are preserved as
+[`cp4-settings-readback-2026-07-28.json`](./evidence/cp4-settings-readback-2026-07-28.json).
+The snapshot includes default-branch SHAs, empty repository-ruleset lists,
+branch protection, Pages configuration, and Pages environment branch policies.
+It omits credentials, actors, permission grants, and mutable API URLs.
+
 After protection, Root Pages still reported `build_type=workflow`; its stale
 `source=gh-pages:/` metadata was not treated as active legacy publishing, and
 the `github-pages` environment still allowed only `master` and rollback branch
