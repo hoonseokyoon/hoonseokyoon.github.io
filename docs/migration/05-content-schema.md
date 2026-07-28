@@ -303,7 +303,22 @@ Relations are:
 
 At least one locale URL is required. If both locales exist, the suffix after
 `/ko/` and `/en/` must match. Links are explicit canonical HTTPS URLs; the root
-build validates shape but does not fetch Tokamak.
+build validates shape but does not fetch Tokamak. Canonical here also excludes
+credentials, explicit ports, query strings, fragments, encoded path separators,
+dot-segment spellings, and non-kebab-case route IDs.
+
+The post-CP4 readiness implementation applies this contract uniformly to
+published TimelineEvent, Project, and Output records. Public projection selects
+the requested-locale URL when present, otherwise retains the available link
+locale so the rendered subtree can expose its actual language. The UI renders
+the typed relation and optional localized label only when a record has links;
+an empty `knowledgeLinks` array emits no related-knowledge block.
+
+Reachability remains a publication concern. The guarded post-deployment live
+audit derives Tokamak targets from `knowledgeLinks` on published records and
+probes them, while validation, tests, and the ordinary root build remain local
+and deterministic. No browser runtime fetch, build-time Tokamak fetch, or
+Tokamak repository change is introduced by this projection.
 
 `sameAs` is never used for Project-to-article relationships. A knowledge article
 is related material, not the same entity as a personal Project or Output.
@@ -441,3 +456,8 @@ CP2 freezes these choices for implementation:
 6. Tokamak integration uses typed absolute URLs and build-time shape validation,
    with no runtime or build-time network coupling.
 7. The public repository contains no supposedly private records, including drafts.
+
+Implementation of the public projection and live-audit path does not publish a
+relationship by itself. Production records may keep `knowledgeLinks: []` until
+the record, target URL, relation, and any public label receive explicit content
+approval.

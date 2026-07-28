@@ -42,6 +42,32 @@ test('source-language Output is marked as English inside the Korean fixture', as
   await expect(page.locator('#fixture-software .language-badge')).toHaveText('EN');
 });
 
+test('timeline and Output knowledge links keep localized targets and unique accessible headings', async ({ page }) => {
+  const timeline = page.locator('#fixture-project-period');
+  const output = page.locator('#fixture-software');
+
+  await expect(timeline.getByRole('link', { name: '합성 지식 프로젝트' })).toHaveAttribute(
+    'href',
+    'https://hoonseokyoon.github.io/tokamak/ko/projects/fixture-knowledge-project/'
+  );
+  await expect(output.getByRole('link', { name: 'Synthetic output notes' })).toHaveAttribute(
+    'href',
+    'https://hoonseokyoon.github.io/tokamak/en/categories/fixture-output-notes/'
+  );
+  await expect(output.getByRole('link', { name: 'Synthetic output notes' })).toHaveAttribute('lang', 'en');
+
+  const headingIds = await page
+    .locator('.record-knowledge :is(h3, h4)')
+    .evaluateAll((headings) => headings.map((heading) => heading.id));
+  expect(headingIds).toEqual([
+    'timeline-fixture-project-period-knowledge-title',
+    'output-fixture-software-knowledge-title'
+  ]);
+  expect(new Set(headingIds).size).toBe(headingIds.length);
+  await expect(timeline.locator('.record-knowledge')).toHaveAttribute('lang', 'ko');
+  await expect(output.locator('.record-knowledge')).toHaveAttribute('lang', 'ko');
+});
+
 test('fixture record headings remain below their section headings', async ({ page }) => {
   await expect(page.locator('#projects').getByRole('heading', { level: 2, name: '선별 프로젝트' })).toBeVisible();
   await expect(

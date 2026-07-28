@@ -31,6 +31,7 @@ export interface PublicTimelineEvent extends LocalizedView<TimelineContent> {
   period: TimelineEvent['period'];
   projectIds: TimelineEvent['projectIds'];
   outputIds: TimelineEvent['outputIds'];
+  knowledgeLinks: PublicKnowledgeLink[];
 }
 
 export interface PublicKnowledgeLink {
@@ -55,6 +56,7 @@ export interface PublicOutput extends LocalizedView<OutputContent> {
   date: Output['date'];
   projectIds: Output['projectIds'];
   links: Output['links'];
+  knowledgeLinks: PublicKnowledgeLink[];
 }
 
 export interface LocalizedPublicCatalog {
@@ -111,7 +113,8 @@ function publicTimelineEvent(event: TimelineEvent, requestedLocale: Locale): Pub
     kind: event.kind,
     period: event.period,
     projectIds: event.projectIds,
-    outputIds: event.outputIds
+    outputIds: event.outputIds,
+    knowledgeLinks: event.knowledgeLinks.map((link) => localizedKnowledgeLink(link, requestedLocale))
   };
 }
 
@@ -134,7 +137,8 @@ function publicOutput(output: Output, requestedLocale: Locale): PublicOutput {
     kind: output.kind,
     date: output.date,
     projectIds: output.projectIds,
-    links: output.links
+    links: output.links,
+    knowledgeLinks: output.knowledgeLinks.map((link) => localizedKnowledgeLink(link, requestedLocale))
   };
 }
 

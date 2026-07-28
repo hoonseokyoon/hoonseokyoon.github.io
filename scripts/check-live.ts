@@ -369,6 +369,52 @@ function assertUniqueRoutes(routes: string[], context: string): void {
   }
 }
 
+function publishedKnowledgeRoutes(catalog: ContentCatalog): string[] {
+  const records = [...catalog.timeline, ...catalog.projects, ...catalog.outputs].filter(
+    (record) => record.editorialStatus === 'published'
+  );
+  const slug = '[a-z0-9]+(?:-[a-z0-9]+)*';
+  const patterns = {
+    article: new RegExp(`^/tokamak/(ko|en)/blog/${slug}/$`),
+    project: new RegExp(`^/tokamak/(ko|en)/projects/${slug}/$`),
+    category: new RegExp(`^/tokamak/(ko|en)/categories/${slug}/$`)
+  } as const;
+  const routes: string[] = [];
+
+  for (const record of records) {
+    for (const link of record.knowledgeLinks) {
+      for (const raw of [link.urls.ko, link.urls.en]) {
+        if (!raw) continue;
+        let url: URL;
+        try {
+          url = new URL(raw);
+        } catch {
+          throw new Error(`Published knowledge link is not a URL: ${raw}`);
+        }
+        if (
+          url.protocol !== 'https:' ||
+          url.origin !== siteOrigin ||
+          url.username ||
+          url.password ||
+          url.port ||
+          url.search ||
+          url.hash ||
+          /[?#]/.test(raw) ||
+          url.href !== raw ||
+          /%(?:2e|2f|5c)/i.test(raw) ||
+          !patterns[link.kind].test(url.pathname) ||
+          !isSafeRequestRoute(url.pathname)
+        ) {
+          throw new Error(`Published knowledge link is not a canonical controlled Tokamak route: ${raw}`);
+        }
+        routes.push(url.pathname);
+      }
+    }
+  }
+
+  return [...new Set(routes)].sort();
+}
+
 export function createLivePlan(
   expectedSha: string,
   catalog: ContentCatalog = loadCatalogFromDisk(),
@@ -433,9 +479,14 @@ export function createLivePlan(
   }
   const calculusKo = calculusEn.replace('/tokamak/en/', '/tokamak/ko/');
   const calculusRoutes: [string, string] = [calculusKo, calculusEn];
+  const knowledgeTargets = publishedKnowledgeRoutes(catalog);
 
   const tokamakRoles = new Map<string, { role: TokamakPageProbe['role']; locale?: Locale }>();
   for (const route of activeTokamakTargets) {
+    const locale = route.match(/^\/tokamak\/(ko|en)\//)?.[1] as Locale | undefined;
+    tokamakRoles.set(route, { role: 'target', locale });
+  }
+  for (const route of knowledgeTargets) {
     const locale = route.match(/^\/tokamak\/(ko|en)\//)?.[1] as Locale | undefined;
     tokamakRoles.set(route, { role: 'target', locale });
   }
@@ -475,7 +526,7 @@ export function createLivePlan(
     {
       kind: 'tokamak-sitemap',
       route: '/tokamak/sitemap.xml',
-      requiredRoutes: [...new Set(['/tokamak/ko/', '/tokamak/en/', ...calculusRoutes, ...activeTokamakTargets])].sort()
+      requiredRoutes: tokamakProbes.map((probe) => probe.route)
     }
   ];
   assertUniqueRoutes(

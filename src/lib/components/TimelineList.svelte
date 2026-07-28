@@ -4,6 +4,7 @@
   import type { PublicOutput, PublicProject, PublicTimelineEvent } from '$lib/content/public';
   import type { Locale } from '$lib/site';
   import { ui } from '$lib/ui';
+  import KnowledgePanel from './KnowledgePanel.svelte';
 
   let {
     events,
@@ -60,6 +61,13 @@
             {/each}
           </ul>
         {/if}
+        <KnowledgePanel
+          links={event.knowledgeLinks}
+          {lang}
+          headingId={`timeline-${event.id}-knowledge-title`}
+          headingLevel={headingLevel === 2 ? 3 : 4}
+          variant="compact"
+        />
       </article>
     </li>
   {/each}

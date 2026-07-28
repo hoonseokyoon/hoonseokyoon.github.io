@@ -39,6 +39,7 @@ test('localized home exposes the approved public record in both languages', asyn
       { exact: true }
     )
   ).toBeVisible();
+  await expect(projects.getByText('0 지식', { exact: true })).toHaveCount(0);
 
   const outputs = page.locator('section[aria-labelledby="recent-outputs-title"]');
   await expect(outputs.getByRole('heading', { level: 3, name: 'Tokamak SvelteKit 사이트' })).toBeVisible();
