@@ -6,6 +6,7 @@ import { canonicalRoutes } from '../src/lib/content/route-manifest';
 import { siteOrigin, socialCardAlt, socialCardUrl } from '../src/lib/site';
 import { outputStructuredDataId, outputStructuredDataType } from '../src/lib/structured-data';
 import type { ContentCatalog } from '../src/lib/content/types';
+import { containsSerializedProperty, internalCatalogFields } from './public-payload-contract';
 import {
   assertSameSet,
   buildRoot,
@@ -59,12 +60,10 @@ function collectStrings(value: unknown): string[] {
 }
 
 function inspectPublicPayloadBoundary(catalog: ContentCatalog): void {
-  const internalKeys = ['editorialStatus', 'sourceLocale', 'evidence', 'checkedAt', 'contributors'];
   for (const file of walkFiles(buildRoot).filter((path) => /\.(?:html|js|json)$/.test(path))) {
     const source = readFileSync(file, 'utf8');
-    for (const key of internalKeys) {
-      const serializedKey = new RegExp(`(?:["']${key}["']|\\.${key}|\\b${key}\\b)\\s*[:=]`);
-      if (serializedKey.test(source)) {
+    for (const key of internalCatalogFields) {
+      if (containsSerializedProperty(source, key)) {
         throw new Error(`Build exposes internal catalog field ${JSON.stringify(key)} in ${file}`);
       }
     }
