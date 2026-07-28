@@ -1,6 +1,6 @@
-**/*.min.css
-**/*.min.js
-assets/css/main.scss
-assets/plotly/demo.html
-lighthouse_results/**
-_posts/2015-10-20-math.md
+node_modules/
+.svelte-kit/
+build/
+playwright-report/
+test-results/
+package-lock.json

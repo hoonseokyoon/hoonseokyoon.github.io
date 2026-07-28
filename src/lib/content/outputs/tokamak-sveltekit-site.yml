@@ -1,0 +1,30 @@
+id: tokamak-sveltekit-site
+kind: software
+editorialStatus: published
+date: 2026-07-17
+sourceLocale: ko
+content:
+  ko:
+    title: Tokamak SvelteKit 사이트
+    summary: 모든 페이지를 미리 렌더링해 GitHub Pages에서 제공하는 이중 언어 지식 사이트입니다.
+    contribution: 정보 구조 설계와 SvelteKit 정적 사이트 구현·유지보수
+  en:
+    title: Tokamak SvelteKit Site
+    summary: A bilingual knowledge site whose pages are prerendered and served on GitHub Pages.
+    contribution: Information architecture, static SvelteKit implementation, and maintenance
+projectIds:
+  - tokamak
+contributors:
+  - person: self
+    role: creator and maintainer
+links:
+  - kind: website
+    url: https://hoonseokyoon.github.io/tokamak/
+    primary: true
+knowledgeLinks: []
+evidence:
+  - kind: canonical-output
+    url: https://hoonseokyoon.github.io/tokamak/
+    checkedAt: 2026-07-28
+  - kind: user-confirmed
+    checkedAt: 2026-07-28
