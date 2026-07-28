@@ -3,7 +3,6 @@
   import OutputList from '$lib/components/OutputList.svelte';
   import PageMeta from '$lib/components/PageMeta.svelte';
   import TimelineList from '$lib/components/TimelineList.svelte';
-  import { localizedContent } from '$lib/content/public';
   import { formatPeriod } from '$lib/format';
   import { localizedMetadata } from '$lib/metadata';
   import { localizedHref } from '$lib/navigation';
@@ -12,7 +11,7 @@
 
   let { data } = $props();
   const labels = $derived(ui[data.lang]);
-  const project = $derived(localizedContent(data.project, data.lang));
+  const project = $derived(data.project);
   const metadata = $derived(localizedMetadata(data.lang, `projects/${data.project.id}`));
   const title = $derived(`${project.content.title} · Hoonseok Yoon`);
   const jsonLd = $derived({
@@ -38,16 +37,16 @@
 
 <header class="project-header" lang={project.locale}>
   <div class="record-meta">
-    <span class="status-label">{labels.lifecycle[data.project.lifecycle]}</span>
+    <span class="status-label">{labels.lifecycle[project.lifecycle]}</span>
     <span aria-hidden="true">·</span>
-    <time>{formatPeriod(data.project.period, data.lang, labels.present)}</time>
+    <time>{formatPeriod(project.period, data.lang, labels.present)}</time>
   </div>
   <h1>{project.content.title}</h1>
   <p class="lede">{project.content.summary}</p>
   <p class="project-role"><strong>{labels.role}:</strong> {project.content.role}</p>
-  {#if data.project.links.length}
+  {#if project.links.length}
     <ul class="project-links">
-      {#each data.project.links as link}
+      {#each project.links as link}
         <li><a href={link.url}>{link.kind}<span aria-hidden="true"> ↗</span></a></li>
       {/each}
     </ul>
@@ -77,14 +76,20 @@
     {#if data.outputs.length}
       <section class="project-section" aria-labelledby="related-outputs-title">
         <h2 id="related-outputs-title">{labels.relatedOutputs}</h2>
-        <OutputList outputs={data.outputs} projects={[data.project]} lang={data.lang} />
+        <OutputList outputs={data.outputs} projects={[project]} lang={data.lang} />
       </section>
     {/if}
 
     {#if data.timeline.length}
       <section class="project-section" aria-labelledby="related-timeline-title">
         <h2 id="related-timeline-title">{labels.relatedTimeline}</h2>
-        <TimelineList events={data.timeline} projects={[data.project]} outputs={data.outputs} lang={data.lang} />
+        <TimelineList
+          events={data.timeline}
+          projects={[project]}
+          outputs={data.outputs}
+          lang={data.lang}
+          headingLevel={3}
+        />
       </section>
     {/if}
   </div>
@@ -95,11 +100,11 @@
       <dl class="fact-list">
         <div>
           <dt>{labels.status}</dt>
-          <dd>{labels.lifecycle[data.project.lifecycle]}</dd>
+          <dd>{labels.lifecycle[project.lifecycle]}</dd>
         </div>
         <div>
           <dt>{labels.period}</dt>
-          <dd>{formatPeriod(data.project.period, data.lang, labels.present)}</dd>
+          <dd>{formatPeriod(project.period, data.lang, labels.present)}</dd>
         </div>
         <div>
           <dt>{labels.outputs}</dt>
@@ -107,6 +112,6 @@
         </div>
       </dl>
     </section>
-    <KnowledgePanel links={data.project.knowledgeLinks} lang={data.lang} />
+    <KnowledgePanel links={project.knowledgeLinks} lang={data.lang} />
   </aside>
 </div>

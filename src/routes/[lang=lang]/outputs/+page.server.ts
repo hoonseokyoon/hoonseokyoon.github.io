@@ -1,12 +1,13 @@
 import type { PageServerLoad } from './$types';
 import { catalog } from '$lib/content/catalog.server';
-import { publishedCatalog, sortedOutputs } from '$lib/content/public';
+import { localizedPublicCatalog, sortedOutputs } from '$lib/content/public';
 import type { Locale } from '$lib/site';
 
 export const load: PageServerLoad = ({ params }) => {
-  const publicCatalog = publishedCatalog(catalog);
+  const lang = params.lang as Locale;
+  const publicCatalog = localizedPublicCatalog(catalog, lang);
   return {
-    lang: params.lang as Locale,
+    lang,
     outputs: sortedOutputs(publicCatalog.outputs),
     projects: publicCatalog.projects
   };

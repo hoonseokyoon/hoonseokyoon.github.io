@@ -405,7 +405,7 @@ dl {
   transform: translateY(-2px);
 }
 
-.project-card h2 {
+.project-card h3 {
   margin: 1.1rem 0 0.75rem;
   font-size: 1.45rem;
 }
@@ -536,7 +536,7 @@ dl {
   text-align: right;
 }
 
-.timeline-record h2 {
+.timeline-record :is(h2, h3) {
   margin: 0.55rem 0 0.45rem;
   font-size: 1.45rem;
 }

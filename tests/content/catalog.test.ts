@@ -4,7 +4,13 @@ import { loadCatalogFromDisk } from '../../src/lib/content/catalog.node';
 import { parseCatalog } from '../../src/lib/content/parse';
 import { legacyRedirects } from '../../src/lib/content/route-manifest';
 import { PartialDateSchema } from '../../src/lib/content/schema';
-import { localizedContent, publishedCatalog, sortedTimeline } from '../../src/lib/content/public';
+import {
+  localizedContent,
+  localizedPublicCatalog,
+  publishedCatalog,
+  sortedTimeline
+} from '../../src/lib/content/public';
+import { outputStructuredData, outputStructuredDataId, outputStructuredDataType } from '../../src/lib/structured-data';
 import { validateCatalog } from '../../src/lib/content/validate';
 import { fixtureCatalog } from '../fixtures/catalog';
 
@@ -34,6 +40,65 @@ describe('personal content catalog', () => {
     expect(localized.locale).toBe('en');
     expect(localized.isFallback).toBe(true);
     expect(localized.content.title).toContain('Fixture source package');
+  });
+
+  it('projects only localized render data into the public page payload', () => {
+    const ko = localizedPublicCatalog(fixtureCatalog, 'ko');
+    const serialized = JSON.stringify(ko);
+
+    expect(ko.person?.content.headline).toBe('시간, 프로젝트, 산출물을 연결하는 개인 기록');
+    expect(ko.outputs[0]).toMatchObject({ locale: 'en', isFallback: true });
+    expect(ko.projects[0].knowledgeLinks).toEqual([
+      {
+        relation: 'background',
+        href: 'https://hoonseokyoon.github.io/tokamak/ko/blog/fixture-knowledge/',
+        locale: 'ko',
+        label: '합성 배경 지식'
+      }
+    ]);
+    for (const internalKey of ['editorialStatus', 'sourceLocale', 'evidence', 'checkedAt', 'contributors']) {
+      expect(serialized).not.toContain(`"${internalKey}"`);
+    }
+    expect(serialized).not.toContain('A personal record connecting time, projects, and outputs');
+    expect(serialized).not.toContain('Synthetic project for route and content-contract testing');
+  });
+
+  it('maps localized Outputs to the approved stable structured-data contract', () => {
+    const output = localizedPublicCatalog(fixtureCatalog, 'ko').outputs[0];
+    const structured = outputStructuredData([output]);
+
+    expect(outputStructuredDataId(output.id)).toBe('https://hoonseokyoon.github.io/#output-fixture-software');
+    expect(structured).toEqual({
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'SoftwareSourceCode',
+          '@id': 'https://hoonseokyoon.github.io/#output-fixture-software',
+          url: 'https://example.test/repository',
+          name: 'Fixture source package with a deliberately long canonical title',
+          description: 'Synthetic software output used to test source-language fallback.',
+          creditText: 'Architecture and implementation',
+          datePublished: '2026-07-28',
+          inLanguage: 'en',
+          author: { '@id': 'https://hoonseokyoon.github.io/#person' }
+        }
+      ]
+    });
+    expect(
+      ['paper', 'software', 'release', 'presentation', 'poster', 'dataset', 'article', 'award', 'other'].map((kind) =>
+        outputStructuredDataType(kind as typeof output.kind)
+      )
+    ).toEqual([
+      'ScholarlyArticle',
+      'SoftwareSourceCode',
+      'CreativeWork',
+      'PresentationDigitalDocument',
+      'CreativeWork',
+      'Dataset',
+      'CreativeWork',
+      'CreativeWork',
+      'CreativeWork'
+    ]);
   });
 
   it('keeps ongoing timeline records first', () => {

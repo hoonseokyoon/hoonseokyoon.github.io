@@ -3,17 +3,11 @@
   import OutputList from '$lib/components/OutputList.svelte';
   import ProjectCard from '$lib/components/ProjectCard.svelte';
   import TimelineList from '$lib/components/TimelineList.svelte';
-  import {
-    localizedContent,
-    publishedCatalog,
-    sortedOutputs,
-    sortedProjects,
-    sortedTimeline
-  } from '$lib/content/public';
+  import { localizedPublicCatalog, sortedOutputs, sortedProjects, sortedTimeline } from '$lib/content/public';
   import { fixtureCatalog } from '../fixtures/catalog';
 
-  const catalog = publishedCatalog(fixtureCatalog);
-  const person = localizedContent(fixtureCatalog.person, 'ko');
+  const catalog = localizedPublicCatalog(fixtureCatalog, 'ko');
+  const person = catalog.person;
   const projects = sortedProjects(catalog.projects);
   const timeline = sortedTimeline(catalog.timeline);
   const outputs = sortedOutputs(catalog.outputs);
@@ -31,9 +25,9 @@
     <section class="home-hero">
       <div class="person-hero">
         <p class="eyebrow">PERSONAL RECORD</p>
-        <h1>{person.content.name}</h1>
-        <p class="person-headline">{person.content.headline}</p>
-        <p class="person-summary">{person.content.summary}</p>
+        <h1>{person?.content.name}</h1>
+        <p class="person-headline">{person?.content.headline}</p>
+        <p class="person-summary">{person?.content.summary}</p>
       </div>
       <aside class="now-panel">
         <h2>현재</h2>
@@ -55,7 +49,7 @@
 
     <section class="home-section" id="timeline">
       <div class="section-heading"><h2>이력</h2></div>
-      <TimelineList events={timeline} {projects} {outputs} lang="ko" />
+      <TimelineList events={timeline} {projects} {outputs} lang="ko" headingLevel={3} />
     </section>
 
     <section class="home-section" id="outputs">

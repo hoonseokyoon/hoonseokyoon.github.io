@@ -41,3 +41,14 @@ test('source-language Output is marked as English inside the Korean fixture', as
   await expect(page.locator('#fixture-software')).toHaveAttribute('lang', 'en');
   await expect(page.locator('#fixture-software .language-badge')).toHaveText('EN');
 });
+
+test('fixture record headings remain below their section headings', async ({ page }) => {
+  await expect(page.locator('#projects').getByRole('heading', { level: 2, name: '선별 프로젝트' })).toBeVisible();
+  await expect(
+    page.locator('#projects').getByRole('heading', {
+      level: 3,
+      name: '경로와 콘텐츠 계약을 검증하는 합성 프로젝트'
+    })
+  ).toBeVisible();
+  await expect(page.locator('#timeline').getByRole('heading', { level: 3, name: '합성 프로젝트 진행' })).toBeVisible();
+});
