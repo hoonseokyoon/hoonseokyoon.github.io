@@ -33,7 +33,7 @@
     <ul>
       {#each links as link}
         <li>
-          <span>{labels.relation[link.relation]}</span>
+          <span class="knowledge-relation">{labels.relation[link.relation]}</span>
           <a href={link.href} lang={link.locale}>{link.label ?? link.href}<span aria-hidden="true"> ↗</span></a>
         </li>
       {/each}

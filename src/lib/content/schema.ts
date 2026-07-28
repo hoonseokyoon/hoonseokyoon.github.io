@@ -50,6 +50,7 @@ const LocaleTextSchema = z.object({
 export const KnowledgeLinkSchema = z.object({
   kind: z.enum(['article', 'project', 'category']),
   relation: z.enum(['background', 'applied', 'produced', 'documents']),
+  reciprocal: z.literal(true).optional(),
   urls: z
     .object({
       ko: HttpsUrlSchema.optional(),

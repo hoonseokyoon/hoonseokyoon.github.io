@@ -237,16 +237,36 @@ describe('catalog and policy-derived plan', () => {
         '/tokamak/ko/',
         '/tokamak/en/',
         '/tokamak/en/categories/paper-review/',
+        '/tokamak/ko/projects/ordinary-differential-equations/',
+        '/tokamak/en/projects/ordinary-differential-equations/',
         ...plan.calculusRoutes
       ])
     );
+    const koOde = plan.probes.find(
+      (probe): probe is TokamakPageProbe =>
+        probe.kind === 'tokamak-page' && probe.route === '/tokamak/ko/projects/ordinary-differential-equations/'
+    );
+    const enOde = plan.probes.find(
+      (probe): probe is TokamakPageProbe =>
+        probe.kind === 'tokamak-page' && probe.route === '/tokamak/en/projects/ordinary-differential-equations/'
+    );
+    expect(koOde).toMatchObject({
+      locale: 'ko',
+      expectedRootBacklinks: ['https://hoonseokyoon.github.io/ko/projects/tokamak/'],
+      forbiddenRootBacklinks: ['https://hoonseokyoon.github.io/en/projects/tokamak/']
+    });
+    expect(enOde).toMatchObject({
+      locale: 'en',
+      expectedRootBacklinks: ['https://hoonseokyoon.github.io/en/projects/tokamak/'],
+      forbiddenRootBacklinks: ['https://hoonseokyoon.github.io/ko/projects/tokamak/']
+    });
     const outputs = plan.probes.find(
       (probe): probe is LocalizedProbe => probe.kind === 'localized' && probe.route === '/en/outputs/'
     );
     expect(outputs?.expectedFragments).toEqual(['software']);
     expect(plan.missingRoute).toBe(`/__root-live-check-missing-${expectedSha}/`);
     expect(new Set(plan.probes.map((probe) => probe.route)).size).toBe(plan.probes.length);
-    expect(plan.probes).toHaveLength(115);
+    expect(plan.probes).toHaveLength(117);
     const counts = plan.probes.reduce<Record<string, number>>((result, probe) => {
       result[probe.kind] = (result[probe.kind] ?? 0) + 1;
       return result;
@@ -260,7 +280,7 @@ describe('catalog and policy-derived plan', () => {
       'root-sitemap': 1,
       robots: 1,
       'compatibility-redirect': 6,
-      'tokamak-page': 5,
+      'tokamak-page': 7,
       'tokamak-sitemap': 1
     });
   });
@@ -313,6 +333,24 @@ describe('catalog and policy-derived plan', () => {
 
     const sitemapProbe = plan.probes.find((probe) => probe.kind === 'tokamak-sitemap');
     expect(sitemapProbe?.requiredRoutes).toEqual(plan.tokamakRoutes);
+  });
+
+  it('does not require a Root Project backlink for an ordinary non-reciprocal Project knowledge link', () => {
+    const catalog = structuredClone(loadCatalogFromDisk());
+    const route = '/tokamak/ko/blog/linear-regression-computation-techniques/';
+    catalog.projects[0].knowledgeLinks = [
+      {
+        kind: 'article',
+        relation: 'background',
+        urls: { ko: `https://hoonseokyoon.github.io${route}` }
+      }
+    ];
+
+    const plan = createLivePlan(expectedSha, catalog);
+    const probe = plan.probes.find(
+      (candidate): candidate is TokamakPageProbe => candidate.kind === 'tokamak-page' && candidate.route === route
+    );
+    expect(probe).toMatchObject({ expectedRootBacklinks: [], forbiddenRootBacklinks: [] });
   });
 
   it('refuses a non-canonical published knowledge target before issuing live requests', () => {
@@ -591,6 +629,42 @@ describe('semantic response contracts', () => {
     const invalid = tokamakCalculusHtml(route, 'en', 'https://hoonseokyoon.github.io/tokamak/#person');
     expect(() => validateLiveProbe(probe, htmlResponse(invalid), encoder.encode(invalid))).toThrow(
       /BlogPosting JSON-LD is not authored by the shared Person/
+    );
+  });
+
+  it('requires a knowledge target to expose exactly one locale-matched reciprocal root Project backlink', () => {
+    const route = '/tokamak/ko/projects/ordinary-differential-equations/';
+    const expected = 'https://hoonseokyoon.github.io/ko/projects/tokamak/';
+    const opposite = 'https://hoonseokyoon.github.io/en/projects/tokamak/';
+    const probe: TokamakPageProbe = {
+      kind: 'tokamak-page',
+      route,
+      role: 'target',
+      locale: 'ko',
+      expectedRootBacklinks: [expected],
+      forbiddenRootBacklinks: [opposite]
+    };
+    const html = (anchors: string) => `<!doctype html><html lang="ko"><head>
+      <link rel="canonical" href="https://hoonseokyoon.github.io${route}">
+      </head><body>${anchors}</body></html>`;
+    const link = (href: string) => `<a href="${href}">Project</a>`;
+    const valid = html(link(expected));
+
+    expect(() => validateLiveProbe(probe, htmlResponse(valid), encoder.encode(valid))).not.toThrow();
+
+    const missing = html('');
+    expect(() => validateLiveProbe(probe, htmlResponse(missing), encoder.encode(missing))).toThrow(
+      /reciprocal root Project backlink/
+    );
+
+    const duplicate = html(`${link(expected)}${link(expected)}`);
+    expect(() => validateLiveProbe(probe, htmlResponse(duplicate), encoder.encode(duplicate))).toThrow(
+      /reciprocal root Project backlink/
+    );
+
+    const mixedLocale = html(`${link(expected)}${link(opposite)}`);
+    expect(() => validateLiveProbe(probe, htmlResponse(mixedLocale), encoder.encode(mixedLocale))).toThrow(
+      /opposite-locale root Project backlink/
     );
   });
 });

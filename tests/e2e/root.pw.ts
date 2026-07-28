@@ -108,6 +108,17 @@ test('Tokamak project detail connects the approved project, output, and timeline
   await expect(page.getByRole('heading', { level: 3, name: 'Tokamak SvelteKit 사이트' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '관련 이력' })).toBeVisible();
   await expect(page.getByRole('heading', { level: 3, name: 'Tokamak 프로젝트 시작' })).toBeVisible();
+  const koKnowledge = page.locator('aside[aria-labelledby="project-tokamak-knowledge-title"]');
+  await expect(koKnowledge.getByRole('heading', { name: '관련 지식 · Tokamak' })).toBeVisible();
+  await expect(koKnowledge.getByText('과정에서 만든 지식', { exact: true })).toBeVisible();
+  await expect(koKnowledge.getByRole('link', { name: /상미분방정식 6부작/ })).toHaveAttribute(
+    'href',
+    'https://hoonseokyoon.github.io/tokamak/ko/projects/ordinary-differential-equations/'
+  );
+  await expect(koKnowledge.getByRole('link', { name: /상미분방정식 6부작/ })).toHaveAttribute('lang', 'ko');
+  await expect(
+    page.locator('a[href="https://hoonseokyoon.github.io/tokamak/en/projects/ordinary-differential-equations/"]')
+  ).toHaveCount(0);
 
   await page.getByRole('navigation', { name: '언어 선택' }).getByRole('link', { name: 'EN' }).click();
   await expect(page).toHaveURL(/\/en\/projects\/tokamak\/$/);
@@ -121,6 +132,17 @@ test('Tokamak project detail connects the approved project, output, and timeline
   await expect(page.locator('.project-role')).toContainText(
     'Planning, information architecture, development, and maintenance'
   );
+  const enKnowledge = page.locator('aside[aria-labelledby="project-tokamak-knowledge-title"]');
+  await expect(enKnowledge.getByRole('heading', { name: 'Related knowledge · Tokamak' })).toBeVisible();
+  await expect(enKnowledge.getByText('Knowledge produced', { exact: true })).toBeVisible();
+  await expect(enKnowledge.getByRole('link', { name: /Six-part ODE series/ })).toHaveAttribute(
+    'href',
+    'https://hoonseokyoon.github.io/tokamak/en/projects/ordinary-differential-equations/'
+  );
+  await expect(enKnowledge.getByRole('link', { name: /Six-part ODE series/ })).toHaveAttribute('lang', 'en');
+  await expect(
+    page.locator('a[href="https://hoonseokyoon.github.io/tokamak/ko/projects/ordinary-differential-equations/"]')
+  ).toHaveCount(0);
 });
 
 test('static compatibility documents contain canonical and visible destinations', async ({ request }) => {
@@ -158,6 +180,9 @@ test('320px shell has no horizontal overflow', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 760 });
   await page.goto('/ko/');
   await expectNoUnexpectedHorizontalOverflow(page);
+  await page.goto('/ko/projects/tokamak/');
+  await expect(page.getByRole('link', { name: /상미분방정식 6부작/ })).toBeVisible();
+  await expectNoUnexpectedHorizontalOverflow(page);
 });
 
 test('navigation remains usable without JavaScript', async ({ browser }) => {
@@ -169,8 +194,17 @@ test('navigation remains usable without JavaScript', async ({ browser }) => {
     await expect(
       page.getByRole('navigation', { name: '주요 메뉴' }).getByRole('link', { name: '지식', exact: true })
     ).toHaveAttribute('href', 'https://hoonseokyoon.github.io/tokamak/ko/');
+    await page.goto('http://127.0.0.1:4173/ko/projects/tokamak/');
+    await expect(page.getByRole('link', { name: /상미분방정식 6부작/ })).toHaveAttribute(
+      'href',
+      'https://hoonseokyoon.github.io/tokamak/ko/projects/ordinary-differential-equations/'
+    );
     await page.getByRole('navigation', { name: '언어 선택' }).getByRole('link', { name: 'EN' }).click();
-    await expect(page).toHaveURL(/\/en\/projects\/$/);
+    await expect(page).toHaveURL(/\/en\/projects\/tokamak\/$/);
+    await expect(page.getByRole('link', { name: /Six-part ODE series/ })).toHaveAttribute(
+      'href',
+      'https://hoonseokyoon.github.io/tokamak/en/projects/ordinary-differential-equations/'
+    );
   } finally {
     await context.close();
   }
