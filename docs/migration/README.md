@@ -1,6 +1,6 @@
 # Personal site and Tokamak migration
 
-Status: **CP1, CP2, public seed, and CP3 approved; both sites live**
+Status: **CP1–CP4 approved; both sites live; CP4 operations implementation in progress**
 
 Audit date: **2026-07-28 (Asia/Seoul)**
 
@@ -9,6 +9,10 @@ CP1 approval date: **2026-07-28 (Asia/Seoul)**
 CP2 approval date: **2026-07-28 (Asia/Seoul)**
 
 CP3 approval date: **2026-07-28 (Asia/Seoul)**
+
+CP4 proposal date: **2026-07-28 (Asia/Seoul)**
+
+CP4 approval date: **2026-07-28 (Asia/Seoul)**
 
 This directory records the decisions required to replace the al-folio site at
 `https://hoonseokyoon.github.io/` with a first-party personal-history site and
@@ -33,6 +37,9 @@ The documents are deliberately separated by decision responsibility:
 7. [`06-implementation-status.md`](06-implementation-status.md) records the
    post-CP2 implementation, production cutover, verification evidence, and
    rollback point.
+8. [`07-post-cutover-operations.md`](07-post-cutover-operations.md) defines the
+   approved repeatable publication, live-verification, branch-protection, and
+   rollback contract for CP4.
 
 ## Safety boundary after CP2
 
@@ -53,6 +60,7 @@ and deferred-route decisions. Work through CP2 did **not**:
 | CP1        | Approve the ownership contract and legacy-route dispositions                 | approved |
 | CP2        | Approve root IA, source policy, schema, locale, and deferred-route decisions | approved |
 | CP3        | Approve production cutover after route, visual, and live checks              | approved |
+| CP4        | Approve the repeatable post-cutover operating and branch-protection contract | approved |
 
 The approved CP2 contracts now constrain the implementation phase. No new
 application code, content records, redirects, or Tokamak behavior changes were
@@ -72,3 +80,10 @@ The final cutover completed through the guarded default-branch workflow, and
 the live root checks plus cross-site integration checks passed. The legacy
 `gh-pages` commit remains the rollback point. See `06-implementation-status.md`
 for the validation evidence and execution record.
+
+CP4 is approved. Tokamak now has an independent PR `Release verification`
+workflow, and the root operations implementation adds exact-release freshness,
+post-deployment live checks, and a reusable manual publication gate. Default
+branch protection and the first CP4 root publication are applied only after the
+implementation PR and exact default-branch checks succeed. New personal facts
+remain gated by a separate explicit content approval.
