@@ -22,10 +22,21 @@ content:
 links:
   - kind: website
     url: https://hoonseokyoon.github.io/tokamak/
-knowledgeLinks: []
+knowledgeLinks:
+  - kind: project
+    relation: produced
+    urls:
+      ko: https://hoonseokyoon.github.io/tokamak/ko/projects/ordinary-differential-equations/
+      en: https://hoonseokyoon.github.io/tokamak/en/projects/ordinary-differential-equations/
+    label:
+      ko: 상미분방정식 6부작
+      en: Six-part ODE series
 evidence:
   - kind: canonical-output
     url: https://hoonseokyoon.github.io/tokamak/
+    checkedAt: 2026-07-28
+  - kind: repository
+    url: https://github.com/hoonseokyoon/tokamak/commit/258e7522e1272b5d3cabe9c772bd8cd570b1ae78
     checkedAt: 2026-07-28
   - kind: user-confirmed
     checkedAt: 2026-07-28

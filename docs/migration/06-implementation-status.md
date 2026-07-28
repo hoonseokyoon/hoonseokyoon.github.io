@@ -6,6 +6,11 @@ Implementation date: **2026-07-28 (Asia/Seoul)**
 
 CP3 approval date: **2026-07-28 (Asia/Seoul)**
 
+This document is the historical CP3 cutover snapshot. The current reusable
+publication gate is `publish_approved`, and the post-cutover live/protection
+contract is recorded in `07-post-cutover-operations.md`. The first reciprocal
+knowledge relationship is recorded in `08-knowledge-link-readiness.md`.
+
 ## Safety state
 
 - Root implementation branch: `codex/personal-site-rebuild`
@@ -23,10 +28,11 @@ CP3 approval date: **2026-07-28 (Asia/Seoul)**
   `a9f29da7fdcf931ed7a7b20faf42223e8094838b`
 - Tokamak Pages run `30326972100`: build, deploy, and live verification passed
 
-The root Pages workflow accepts only a manual dispatch whose `cp3_approved`
-input is true and whose ref is the repository default branch. The approved run
-executed from `master`, repeated the complete release validator, uploaded the
-artifact, and deployed it after the Pages build type changed to `workflow`.
+At CP3 cutover, the root Pages workflow accepted only a manual dispatch whose
+`cp3_approved` input was true and whose ref was the repository default branch.
+The approved run executed from `master`, repeated the complete release
+validator, uploaded the artifact, and deployed it after the Pages build type
+changed to `workflow`.
 
 ## Root implementation completed
 

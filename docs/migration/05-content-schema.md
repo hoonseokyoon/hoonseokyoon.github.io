@@ -458,6 +458,9 @@ CP2 freezes these choices for implementation:
 7. The public repository contains no supposedly private records, including drafts.
 
 Implementation of the public projection and live-audit path does not publish a
-relationship by itself. Production records may keep `knowledgeLinks: []` until
-the record, target URL, relation, and any public label receive explicit content
-approval.
+relationship by itself. Production records keep `knowledgeLinks: []` until the
+record, target URL, relation, and any public label receive explicit content
+approval. The first approved instance is the personal `tokamak` Project's
+`produced` link to the localized ODE SubProject pair documented in
+[`08-knowledge-link-readiness.md`](08-knowledge-link-readiness.md); it does not
+authorize any additional inferred relationships.

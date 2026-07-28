@@ -11,9 +11,11 @@
 | [Personal Record](https://hoonseokyoon.github.io/) | 사람, 이력, 프로젝트 참여, 역할, 산출물    |
 | [Tokamak](https://hoonseokyoon.github.io/tokamak/) | 학습 노트, 기술 설명, 논문 리뷰, 지식 관계 |
 
-두 사이트는 본문을 복제하지 않습니다. 개인 사이트의 프로젝트와 산출물은 관련 Tokamak 글을
-절대 URL로 참조하고, Tokamak의 저자 구조화 데이터는 개인 사이트의 고정 Person ID
-`https://hoonseokyoon.github.io/#person`을 가리킵니다.
+두 사이트는 본문을 복제하지 않습니다. 개인 사이트의 프로젝트와 산출물은 관련 Tokamak 지식을
+절대 URL로 참조하고, Tokamak의 연결된 지식 화면은 같은 언어의 개인 Project로 돌아옵니다.
+Tokamak의 저자 구조화 데이터는 개인 사이트의 고정 Person ID
+`https://hoonseokyoon.github.io/#person`을 가리킵니다. 첫 양방향 관계는 개인 `Tokamak`
+Project와 Tokamak의 ODE 6부작입니다.
 
 ## 현재 상태와 안전 경계
 
@@ -25,8 +27,10 @@
   Open Graph/Twitter 메타데이터에 연결했습니다.
 - Tokamak의 새 KO/EN calculus 글을 먼저 배포하고 라이브 검증한 뒤에만 기존 calculus URL의
   리다이렉트 게이트를 활성화했습니다.
+- 개인 `Tokamak` Project는 같은 언어의 ODE 6부작을 `produced` 관계로 공개하며, 해당 Tokamak
+  화면은 같은 언어의 개인 Project로 돌아옵니다.
 - `published` 개인 기록은 명시적으로 확인된 사실과 근거만 허용합니다.
-- GitHub Pages 배포 워크플로는 수동 실행만 지원하며, CP3 승인 확인 입력과 전체 release
+- GitHub Pages 배포 워크플로는 수동 실행만 지원하며, `publish_approved` 확인 입력과 전체 release
   검증을 모두 통과해야 합니다.
 
 결정 근거와 전체 경로 정책은 [`docs/migration/`](docs/migration/README.md)에 있습니다.
@@ -70,9 +74,10 @@ npm run dev
 | `npm run check:build`                   | 정적 산출물, 메타데이터, 링크 무결성 검증    |
 | `npm run verify`                        | 위 release 검증을 포함한 전체 CI 기준 실행   |
 
-승인된 최소 공개 seed와 social-preview를 포함한 전체 `npm run verify`가 통과했습니다. 현재
-검증 기준은 단위 테스트 13개, 브라우저 테스트 18개, 로컬라이즈 정규 페이지 10개, 활성
-리다이렉트 7개입니다. 상세 결과는 `docs/migration/06-implementation-status.md`에 기록합니다.
+승인된 공개 seed, 첫 지식 관계, social-preview를 포함한 전체 `npm run verify`가 CI 기준입니다.
+테스트와 라이브 probe 수는 catalog와 경로 정책에서 파생하며, 현재 계약과 실행 기록은
+`docs/migration/06-implementation-status.md`, `07-post-cutover-operations.md`,
+`08-knowledge-link-readiness.md`에 기록합니다.
 
 ## 콘텐츠 작성
 
@@ -94,14 +99,13 @@ src/lib/content/outputs/*.yml
 - `.github/workflows/ci.yml`은 pull request와 기본 브랜치 push에서 `npm run verify`를 실행합니다.
 - `.github/workflows/pages.yml`은 `workflow_dispatch`만 받습니다. 자동 push 배포 트리거는 없습니다.
 - 저장소의 Pages publishing source를 **GitHub Actions**로 전환하고, 수동 실행 시
-  `cp3_approved`를 확인해야만 `build/` 산출물이 `github-pages` 환경에 배포됩니다.
+  `publish_approved`를 확인해야만 `build/` 산출물이 `github-pages` 환경에 배포됩니다.
 - `github-pages` 환경에는 기본 브랜치 제한과 필요한 경우 승인자 보호 규칙을 설정합니다.
 
-CP3 실행은 Tokamak 변경을 먼저 배포하고 KO/EN calculus 대상 URL을 실제 공개 환경에서
-검증한 다음, 루트의 레거시 calculus 리다이렉트를 활성화하고 루트 사이트를 전환하는 순서를
-따릅니다.
+교차 사이트 관계 변경은 Tokamak를 먼저 배포·검증한 다음 Root 참조를 병합하고, 정확한 Root
+기본 브랜치 SHA를 수동 배포하는 순서를 따릅니다.
 
-배포 워크플로 자체가 Pages 설정을 대신하지 않습니다. 기본 브랜치에서 CP3 확인 입력과 전체
+배포 워크플로 자체가 Pages 설정을 대신하지 않습니다. 기본 브랜치에서 공개 확인 입력과 전체
 검증을 통과한 artifact만 배포합니다.
 
 ## License

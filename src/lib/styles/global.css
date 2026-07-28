@@ -757,7 +757,7 @@ dl {
   gap: 1rem;
 }
 
-.knowledge-links li span {
+.knowledge-links .knowledge-relation {
   display: block;
   color: var(--color-text-subtle);
   font-size: 0.74rem;

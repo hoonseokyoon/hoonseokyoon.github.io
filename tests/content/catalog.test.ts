@@ -31,6 +31,43 @@ describe('personal content catalog', () => {
     expect(validateCatalog(loadCatalogFromDisk(), { requireReleaseContent: true })).toEqual([]);
   });
 
+  it('publishes the approved Tokamak Project to ODE knowledge relation in the requested locale only', () => {
+    const catalog = loadCatalogFromDisk();
+    const project = catalog.projects.find((record) => record.id === 'tokamak')!;
+    const ko = localizedPublicCatalog(catalog, 'ko').projects.find((record) => record.id === 'tokamak')!;
+    const en = localizedPublicCatalog(catalog, 'en').projects.find((record) => record.id === 'tokamak')!;
+
+    expect(project.knowledgeLinks).toEqual([
+      {
+        kind: 'project',
+        relation: 'produced',
+        urls: {
+          ko: 'https://hoonseokyoon.github.io/tokamak/ko/projects/ordinary-differential-equations/',
+          en: 'https://hoonseokyoon.github.io/tokamak/en/projects/ordinary-differential-equations/'
+        },
+        label: { ko: '상미분방정식 6부작', en: 'Six-part ODE series' }
+      }
+    ]);
+    expect(ko.knowledgeLinks).toEqual([
+      {
+        relation: 'produced',
+        href: 'https://hoonseokyoon.github.io/tokamak/ko/projects/ordinary-differential-equations/',
+        locale: 'ko',
+        label: '상미분방정식 6부작'
+      }
+    ]);
+    expect(en.knowledgeLinks).toEqual([
+      {
+        relation: 'produced',
+        href: 'https://hoonseokyoon.github.io/tokamak/en/projects/ordinary-differential-equations/',
+        locale: 'en',
+        label: 'Six-part ODE series'
+      }
+    ]);
+    expect(JSON.stringify(ko)).not.toContain('/tokamak/en/projects/ordinary-differential-equations/');
+    expect(JSON.stringify(en)).not.toContain('/tokamak/ko/projects/ordinary-differential-equations/');
+  });
+
   it('accepts the complete synthetic release fixture', () => {
     expect(validateCatalog(fixtureCatalog, { requireReleaseContent: true })).toEqual([]);
   });

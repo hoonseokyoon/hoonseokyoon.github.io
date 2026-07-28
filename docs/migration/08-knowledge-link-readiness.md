@@ -1,74 +1,85 @@
-# Knowledge-link publication readiness
+# First reciprocal knowledge relationship
 
-Status: **post-CP4 capability implemented; relationship content not approved**
+Status: **first relationship approved and implemented; guarded publication required**
 
 Implementation date: **2026-07-28 (Asia/Seoul)**
 
 ## Purpose
 
-CP2 approved typed `knowledgeLinks` from root TimelineEvent, Project, and Output
-records to canonical Tokamak URLs. This post-CP4 slice completes the dormant
-publication path without asserting a new relationship:
+The post-CP4 readiness slice established typed `knowledgeLinks`, localized
+public projection, conditional UI, and catalog-derived live probes without
+publishing a relationship. The first approved relationship now uses that path:
 
-1. published records retain only their localized public link projection;
-2. timeline, project, and output UI can render the relation and optional label;
-3. empty link arrays render no related-knowledge block; and
-4. the guarded post-deployment audit probes targets derived from published
-   `knowledgeLinks`.
+- root owner: personal Project `tokamak`;
+- relation: `produced`;
+- canonical Tokamak target: the Ordinary Differential Equations SubProject;
+- KO label: `상미분방정식 6부작`;
+- EN label: `Six-part ODE series`; and
+- reciprocal owner in Tokamak: `personalProjectId: tokamak` on the ODE
+  SubProject.
 
-This is readiness work, not a content migration. The production TimelineEvent,
-Project, and Output records still use `knowledgeLinks: []`.
+The exact localized pair is:
 
-## Publication boundary
+```text
+https://hoonseokyoon.github.io/ko/projects/tokamak/
+  ↔ https://hoonseokyoon.github.io/tokamak/ko/projects/ordinary-differential-equations/
 
-The capability preserves the existing separation between the two sites:
+https://hoonseokyoon.github.io/en/projects/tokamak/
+  ↔ https://hoonseokyoon.github.io/tokamak/en/projects/ordinary-differential-equations/
+```
 
-- the root catalog explicitly owns each cross-site reference and relation;
-- Tokamak remains canonical for the linked knowledge resource;
-- the root site does not import Tokamak's project graph, taxonomy, or content;
-- validation, tests, and the ordinary build use local catalog data only;
-- no runtime API or browser fetch is added; and
-- this slice changes neither the Tokamak repository nor its deployed behavior.
+## Publication evidence and order
 
-Network reachability is checked only by the release live audit after the root
-artifact is deployed. A Tokamak outage therefore cannot make an ordinary root
-build nondeterministic, while a newly published broken relationship still fails
-the publication verification.
+The relationship is supported by the existing dated user confirmation on the
+published Project, the deployed Tokamak canonical output, and Tokamak merge
+commit `258e7522e1272b5d3cabe9c772bd8cd570b1ae78`. Tokamak PR `#68` introduced
+the locale-matched reciprocal Project link and was deployed before this Root
+reference was prepared.
 
-No personal fact, chronology, role, contribution, or project outcome is added or
-changed by this work. Rendering a relation such as `applied` or `produced` would
-itself make a public claim, so an implemented field is not permission to fill it.
+The release order remains dependency-safe:
 
-## First relationship checkpoint
+1. merge and deploy Tokamak;
+2. pass Tokamak artifact, browser, route, and post-deployment checks;
+3. verify both localized ODE targets and their reciprocal Root hrefs;
+4. merge the Root relation through a reviewed pull request; and
+5. manually publish the exact Root default-branch SHA with
+   `publish_approved: true`.
 
-The next explicit content checkpoint must approve all of the following before
-the first production link is added:
+The Root build remains deterministic. Schema validation, unit tests, browser
+tests, and ordinary static generation use local catalog data only; they do not
+fetch Tokamak. Network reachability and reciprocity are checked only by the
+bounded post-deployment live audit.
 
-1. the exact published TimelineEvent, Project, or Output record;
-2. the existing canonical Tokamak target and its declared route kind;
-3. the semantic relation: `background`, `applied`, `produced`, or `documents`;
-4. the locale URL pair or approved single-locale fallback;
-5. any KO/EN public label; and
-6. evidence or direct user confirmation supporting the relationship claim.
+## Public and validation contract
 
-The Tokamak ODE series is only a candidate inventory for that review. This
-document does not approve an ODE URL, associate the series with any production
-personal record, or assign it a relation label. No such link should be inferred
-or published before the checkpoint above.
+- The production Root Project stores both canonical locale URLs but public page
+  data contains only the requested locale target and label.
+- The Root Project detail renders one named related-knowledge panel; an empty
+  `knowledgeLinks` array still renders no panel on other record surfaces.
+- The Tokamak ODE page renders one static, same-tab anchor to the matching Root
+  Project and does not expose the opposite-locale Project URL.
+- Both links remain usable without JavaScript and at a 320-pixel viewport.
+- Root URL validation rejects alternate origins, credentials, ports, queries,
+  fragments, encoded traversal, weak path shapes, locale mismatch, and
+  duplicate knowledge URLs within one record.
+- Tokamak validation accepts only manifest-owned Root Project URLs and requires
+  every approved locale URL to have exactly one published SubProject owner.
+- The Root live plan derives the two ODE targets from the published catalog,
+  increasing the controlled plan from 115 to 117 probes and the Tokamak page
+  subset from 5 to 7.
+- Each ODE live probe requires exactly one matching Root Project backlink and
+  rejects the opposite-locale backlink; the Tokamak live checker independently
+  enforces the same relationship from the other repository.
 
-## Release acceptance
+## Ownership boundary
 
-The readiness slice is acceptable when automated checks demonstrate that:
+Root remains canonical for the personal Project, role, dates, and outputs.
+Tokamak remains canonical for the ODE knowledge structure and its six articles.
+Neither repository copies the other's body content or imports its runtime
+graph. The relationship is a typed navigation edge, not `sameAs`, and does not
+add claims about education, employment, collaborators, impact, or outcomes.
 
-- TimelineEvent, Project, and Output links survive published-only public
-  projection with correct locale fallback;
-- each record surface renders relation text, optional labels, external-link
-  semantics, and actual-language markup without an empty-state panel;
-- the live plan includes every unique Tokamak target declared by published
-  records and ignores draft-only relationship content;
-- ordinary validation and build execution do not contact Tokamak; and
-- the production catalog remains unchanged with respect to relationship links.
-
-The first real link must then follow the dependency order in
-[`07-post-cutover-operations.md`](07-post-cutover-operations.md): ensure the
-Tokamak target is deployed and verified before publishing the root reference.
+Future relationships must repeat the same content decision: exact owner,
+canonical target, relation, locale pair or explicit fallback, public label, and
+evidence. The existence of this first link does not authorize filling other
+production `knowledgeLinks` arrays by inference.

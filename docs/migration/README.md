@@ -2,6 +2,8 @@
 
 Status: **CP1–CP4 complete; both sites live; CP4 operations verified**
 
+Relationship status: **first reciprocal knowledge relationship implemented**
+
 Audit date: **2026-07-28 (Asia/Seoul)**
 
 CP1 approval date: **2026-07-28 (Asia/Seoul)**
@@ -46,8 +48,8 @@ The documents are deliberately separated by decision responsibility:
    preserves the normalized, non-secret branch-protection, Pages, and
    environment-policy readback captured at CP4 completion.
 10. [`08-knowledge-link-readiness.md`](08-knowledge-link-readiness.md) records
-    the post-CP4 public-projection, UI, and live-audit capability boundary before
-    any real personal-record relationship is published.
+    the first approved Root Project ↔ Tokamak knowledge relationship, its
+    ownership boundary, and its bilateral release contract.
 
 ## Safety boundary after CP2
 
@@ -99,10 +101,10 @@ without retry. See `07-post-cutover-operations.md` and the linked settings
 snapshot for the permanent evidence. New personal facts remain gated by a
 separate explicit content approval.
 
-Post-CP4 knowledge-link readiness now covers published TimelineEvent, Project,
-and Output projection, conditional UI, and catalog-derived release probing
-without runtime or ordinary-build coupling to Tokamak. Production
-`knowledgeLinks` remain empty: the first target, relationship, and public label
-require the next explicit content checkpoint. The Tokamak ODE series is a review
-candidate only, not an approved or published relationship. See
-`08-knowledge-link-readiness.md` for the exact boundary.
+Post-CP4 knowledge linking now has its first approved production relation. The
+personal `tokamak` Project points to the localized Tokamak ODE six-part series
+with relation `produced`, and that Tokamak SubProject points back to the
+same-locale personal Project. Both repositories keep independent schemas,
+builds, and content ownership; reciprocal reachability is enforced only by
+bounded post-deployment checks. See `08-knowledge-link-readiness.md` for the
+exact URLs, evidence, deployment order, and validation boundary.

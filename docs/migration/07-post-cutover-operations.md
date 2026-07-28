@@ -221,7 +221,11 @@ Controlled cross-site verification also requires:
 - both localized calculus articles and the Tokamak sitemap to be reachable;
 - calculus articles to expose the visible root author link;
 - Tokamak WebSite and BlogPosting authorship to reference
-  `https://hoonseokyoon.github.io/#person`.
+  `https://hoonseokyoon.github.io/#person`;
+- every published Root `knowledgeLinks` target to be included in the controlled
+  Tokamak page and sitemap plan; and
+- a Tokamak target owned by a Root Project relation to contain exactly one
+  same-locale Root Project backlink and no opposite-locale Project backlink.
 
 The checker does not crawl unrelated third-party links or make an unrelated
 external service outage fail a root release.
@@ -445,5 +449,6 @@ for the unique missing route.
 CP4 authorizes only the operating changes listed in this contract. Personal
 facts and other public content, the license, Tokamak's parked design contract,
 hosting, environment-policy changes, rollback-asset mutation, and automatic
-rollback remain outside scope. The next content publication still requires its
-own explicit content approval.
+rollback remain outside scope. Any later content publication still requires its
+own explicit content approval; the first reciprocal relationship has the
+separate approval and evidence recorded in `08-knowledge-link-readiness.md`.

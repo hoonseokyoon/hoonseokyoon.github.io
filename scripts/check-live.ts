@@ -124,6 +124,8 @@ export interface TokamakPageProbe {
   route: string;
   role: 'home' | 'calculus' | 'target';
   locale?: Locale;
+  expectedRootBacklinks?: string[];
+  forbiddenRootBacklinks?: string[];
 }
 
 export interface TokamakSitemapProbe {
@@ -369,19 +371,34 @@ function assertUniqueRoutes(routes: string[], context: string): void {
   }
 }
 
-function publishedKnowledgeRoutes(catalog: ContentCatalog): string[] {
-  const records = [...catalog.timeline, ...catalog.projects, ...catalog.outputs].filter(
-    (record) => record.editorialStatus === 'published'
-  );
+interface PublishedKnowledgeTarget {
+  route: string;
+  locale: Locale;
+  expectedRootBacklinks: string[];
+  forbiddenRootBacklinks: string[];
+}
+
+function publishedKnowledgeTargets(catalog: ContentCatalog): PublishedKnowledgeTarget[] {
+  const records: Array<{
+    record: Pick<ContentCatalog['projects'][number], 'editorialStatus' | 'knowledgeLinks'>;
+    projectId?: string;
+  }> = [
+    ...catalog.timeline.map((record) => ({ record })),
+    ...catalog.projects.map((record) => ({ record, projectId: record.id })),
+    ...catalog.outputs.map((record) => ({ record }))
+  ].filter(({ record }) => record.editorialStatus === 'published');
   const slug = '[a-z0-9]+(?:-[a-z0-9]+)*';
   const patterns = {
     article: new RegExp(`^/tokamak/(ko|en)/blog/${slug}/$`),
     project: new RegExp(`^/tokamak/(ko|en)/projects/${slug}/$`),
     category: new RegExp(`^/tokamak/(ko|en)/categories/${slug}/$`)
   } as const;
-  const routes: string[] = [];
+  const targets = new Map<
+    string,
+    { locale: Locale; expectedRootBacklinks: Set<string>; forbiddenRootBacklinks: Set<string> }
+  >();
 
-  for (const record of records) {
+  for (const { record, projectId } of records) {
     for (const link of record.knowledgeLinks) {
       for (const raw of [link.urls.ko, link.urls.en]) {
         if (!raw) continue;
@@ -407,12 +424,30 @@ function publishedKnowledgeRoutes(catalog: ContentCatalog): string[] {
         ) {
           throw new Error(`Published knowledge link is not a canonical controlled Tokamak route: ${raw}`);
         }
-        routes.push(url.pathname);
+        const locale = url.pathname.match(/^\/tokamak\/(ko|en)\//)?.[1] as Locale;
+        const target = targets.get(url.pathname) ?? {
+          locale,
+          expectedRootBacklinks: new Set<string>(),
+          forbiddenRootBacklinks: new Set<string>()
+        };
+        if (projectId) {
+          const oppositeLocale = locale === 'ko' ? 'en' : 'ko';
+          target.expectedRootBacklinks.add(`${siteOrigin}/${locale}/projects/${projectId}/`);
+          target.forbiddenRootBacklinks.add(`${siteOrigin}/${oppositeLocale}/projects/${projectId}/`);
+        }
+        targets.set(url.pathname, target);
       }
     }
   }
 
-  return [...new Set(routes)].sort();
+  return [...targets.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([route, target]) => ({
+      route,
+      locale: target.locale,
+      expectedRootBacklinks: [...target.expectedRootBacklinks].sort(),
+      forbiddenRootBacklinks: [...target.forbiddenRootBacklinks].sort()
+    }));
 }
 
 export function createLivePlan(
@@ -479,24 +514,59 @@ export function createLivePlan(
   }
   const calculusKo = calculusEn.replace('/tokamak/en/', '/tokamak/ko/');
   const calculusRoutes: [string, string] = [calculusKo, calculusEn];
-  const knowledgeTargets = publishedKnowledgeRoutes(catalog);
+  const knowledgeTargets = publishedKnowledgeTargets(catalog);
 
-  const tokamakRoles = new Map<string, { role: TokamakPageProbe['role']; locale?: Locale }>();
+  const tokamakRoles = new Map<
+    string,
+    {
+      role: TokamakPageProbe['role'];
+      locale?: Locale;
+      expectedRootBacklinks: Set<string>;
+      forbiddenRootBacklinks: Set<string>;
+    }
+  >();
+  const upsertTokamakRole = (
+    route: string,
+    role: TokamakPageProbe['role'],
+    locale?: Locale,
+    expectedRootBacklinks: readonly string[] = [],
+    forbiddenRootBacklinks: readonly string[] = []
+  ) => {
+    const existing = tokamakRoles.get(route);
+    tokamakRoles.set(route, {
+      role,
+      locale: locale ?? existing?.locale,
+      expectedRootBacklinks: new Set([...(existing?.expectedRootBacklinks ?? []), ...expectedRootBacklinks]),
+      forbiddenRootBacklinks: new Set([...(existing?.forbiddenRootBacklinks ?? []), ...forbiddenRootBacklinks])
+    });
+  };
   for (const route of activeTokamakTargets) {
     const locale = route.match(/^\/tokamak\/(ko|en)\//)?.[1] as Locale | undefined;
-    tokamakRoles.set(route, { role: 'target', locale });
+    upsertTokamakRole(route, 'target', locale);
   }
-  for (const route of knowledgeTargets) {
-    const locale = route.match(/^\/tokamak\/(ko|en)\//)?.[1] as Locale | undefined;
-    tokamakRoles.set(route, { role: 'target', locale });
+  for (const target of knowledgeTargets) {
+    upsertTokamakRole(
+      target.route,
+      'target',
+      target.locale,
+      target.expectedRootBacklinks,
+      target.forbiddenRootBacklinks
+    );
   }
-  tokamakRoles.set('/tokamak/ko/', { role: 'home', locale: 'ko' });
-  tokamakRoles.set('/tokamak/en/', { role: 'home', locale: 'en' });
-  tokamakRoles.set(calculusKo, { role: 'calculus', locale: 'ko' });
-  tokamakRoles.set(calculusEn, { role: 'calculus', locale: 'en' });
+  upsertTokamakRole('/tokamak/ko/', 'home', 'ko');
+  upsertTokamakRole('/tokamak/en/', 'home', 'en');
+  upsertTokamakRole(calculusKo, 'calculus', 'ko');
+  upsertTokamakRole(calculusEn, 'calculus', 'en');
   const tokamakProbes: TokamakPageProbe[] = [...tokamakRoles.entries()]
     .sort(([left], [right]) => left.localeCompare(right))
-    .map(([route, details]) => ({ kind: 'tokamak-page', route, ...details }));
+    .map(([route, details]) => ({
+      kind: 'tokamak-page',
+      route,
+      role: details.role,
+      locale: details.locale,
+      expectedRootBacklinks: [...details.expectedRootBacklinks].sort(),
+      forbiddenRootBacklinks: [...details.forbiddenRootBacklinks].sort()
+    }));
 
   const missingRoute = `${missingRoutePrefix}${expectedSha}/`;
   const probes: LiveProbe[] = [
@@ -1078,6 +1148,19 @@ function validateTokamakPage(probe: TokamakPageProbe, response: Response, html: 
   }
   if ((probe.role === 'home' || probe.role === 'calculus') && !hasExactAnchor(html, `${siteOrigin}/`)) {
     throw new Error(`${probe.route} is missing the visible root author link`);
+  }
+  const anchorHrefs = tags(html, 'a').flatMap((tag) => (tag.attributes.href ? [tag.attributes.href] : []));
+  for (const href of probe.expectedRootBacklinks ?? []) {
+    exactlyOne(
+      anchorHrefs.filter((candidate) => candidate === href),
+      href,
+      `${probe.route} reciprocal root Project backlink`
+    );
+  }
+  for (const href of probe.forbiddenRootBacklinks ?? []) {
+    if (anchorHrefs.includes(href)) {
+      throw new Error(`${probe.route} contains the opposite-locale root Project backlink ${href}`);
+    }
   }
   if (probe.role === 'calculus') validateTokamakIdentity(html, probe.route);
 }
