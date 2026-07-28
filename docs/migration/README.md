@@ -1,6 +1,6 @@
 # Personal site and Tokamak migration
 
-Status: **CP1–CP4 approved; both sites live; CP4 operations implementation in progress**
+Status: **CP1–CP4 complete; both sites live; CP4 operations verified**
 
 Audit date: **2026-07-28 (Asia/Seoul)**
 
@@ -13,6 +13,8 @@ CP3 approval date: **2026-07-28 (Asia/Seoul)**
 CP4 proposal date: **2026-07-28 (Asia/Seoul)**
 
 CP4 approval date: **2026-07-28 (Asia/Seoul)**
+
+CP4 completion date: **2026-07-28 (Asia/Seoul)**
 
 This directory records the decisions required to replace the al-folio site at
 `https://hoonseokyoon.github.io/` with a first-party personal-history site and
@@ -39,7 +41,10 @@ The documents are deliberately separated by decision responsibility:
    rollback point.
 8. [`07-post-cutover-operations.md`](07-post-cutover-operations.md) defines the
    approved repeatable publication, live-verification, branch-protection, and
-   rollback contract for CP4.
+   rollback contract for CP4 and records its completed execution evidence.
+9. [`evidence/cp4-settings-readback-2026-07-28.json`](evidence/cp4-settings-readback-2026-07-28.json)
+   preserves the normalized, non-secret branch-protection, Pages, and
+   environment-policy readback captured at CP4 completion.
 
 ## Safety boundary after CP2
 
@@ -81,9 +86,12 @@ the live root checks plus cross-site integration checks passed. The legacy
 `gh-pages` commit remains the rollback point. See `06-implementation-status.md`
 for the validation evidence and execution record.
 
-CP4 is approved. Tokamak now has an independent PR `Release verification`
-workflow, and the root operations implementation adds exact-release freshness,
-post-deployment live checks, and a reusable manual publication gate. Default
-branch protection and the first CP4 root publication are applied only after the
-implementation PR and exact default-branch checks succeed. New personal facts
-remain gated by a separate explicit content approval.
+CP4 is complete. Tokamak now has an independent PR `Release verification`
+workflow, and the root operations implementation provides exact-release
+freshness, post-deployment live checks, and a reusable manual publication gate.
+Equivalent default-branch protection was applied and read back on both
+repositories after their exact default-branch checks succeeded. The first CP4
+root publication deployed its exact merge SHA and passed all 115 live probes
+without retry. See `07-post-cutover-operations.md` and the linked settings
+snapshot for the permanent evidence. New personal facts remain gated by a
+separate explicit content approval.

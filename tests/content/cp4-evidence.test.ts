@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 const evidence = JSON.parse(
   readFileSync(new URL('../../docs/migration/evidence/cp4-settings-readback-2026-07-28.json', import.meta.url), 'utf8')
 );
+const migrationIndex = readFileSync(new URL('../../docs/migration/README.md', import.meta.url), 'utf8');
 
 const expectedProtection = {
   requiredStatusChecks: {
@@ -67,5 +68,15 @@ describe('CP4 external-settings evidence', () => {
         allowedBranches: [{ name: 'main', type: 'branch' }]
       }
     });
+  });
+
+  it('keeps the migration index aligned with the completed CP4 record and evidence', () => {
+    expect(migrationIndex).toContain('Status: **CP1–CP4 complete; both sites live; CP4 operations verified**');
+    expect(migrationIndex).toContain('CP4 completion date: **2026-07-28 (Asia/Seoul)**');
+    expect(migrationIndex).toContain('evidence/cp4-settings-readback-2026-07-28.json');
+    expect(migrationIndex).toContain('passed all 115 live probes');
+    expect(migrationIndex).not.toMatch(
+      /CP4 operations implementation in progress|first CP4 root publication are applied/
+    );
   });
 });
