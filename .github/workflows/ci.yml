@@ -16,7 +16,8 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify
+    # Keep this name in sync with the required status check on master.
+    name: Release verification
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
