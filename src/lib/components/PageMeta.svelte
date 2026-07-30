@@ -34,8 +34,8 @@
   <meta property="og:url" content={canonical} />
   <meta property="og:image" content={socialCardUrl} />
   <meta property="og:image:type" content="image/png" />
-  <meta property="og:image:width" content="1731" />
-  <meta property="og:image:height" content="909" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content={socialCardAlt} />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />

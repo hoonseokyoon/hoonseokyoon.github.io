@@ -6,8 +6,8 @@
   const labels = $derived(ui[lang]);
 </script>
 
-<section class="content-gate" aria-labelledby="content-gate-title">
-  <p class="eyebrow">CONTENT GATE</p>
+<section class="notice" aria-labelledby="content-gate-title">
+  <p class="label">{lang === 'ko' ? '비공개' : 'Unpublished'}</p>
   <h1 id="content-gate-title">{labels.profileApprovalRequired}</h1>
-  <p class="lede">{labels.profileApprovalDescription}</p>
+  <p>{labels.profileApprovalDescription}</p>
 </section>

@@ -1,11 +1,12 @@
 import type { Locale } from '$lib/site';
 
+/** Verbose, locale-aware date for prose and metadata. */
 export function formatPartialDate(value: string, lang: Locale) {
   const [year, month, day] = value.split('-').map(Number);
   if (!month) return String(year);
   if (!day)
     return lang === 'ko'
-      ? `${year}. ${String(month).padStart(2, '0')}.`
+      ? `${year}년 ${month}월`
       : new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', timeZone: 'UTC' }).format(
           new Date(Date.UTC(year, month - 1, 1))
         );
@@ -17,8 +18,23 @@ export function formatPartialDate(value: string, lang: Locale) {
   }).format(new Date(Date.UTC(year, month - 1, day)));
 }
 
+/**
+ * Compact numeric date for the ledger gutter. Deliberately identical in both
+ * locales so the date column stays aligned, the way a printed CV sets it.
+ */
+export function tabularDate(value: string) {
+  return value.replaceAll('-', '.');
+}
+
+export function tabularPeriod(period: { start: string; end?: string }, presentLabel: string) {
+  return {
+    start: tabularDate(period.start),
+    end: period.end === 'present' ? presentLabel : period.end ? tabularDate(period.end) : undefined
+  };
+}
+
 export function formatPeriod(period: { start: string; end?: string }, lang: Locale, presentLabel: string) {
   const start = formatPartialDate(period.start, lang);
   const end = period.end === 'present' ? presentLabel : period.end ? formatPartialDate(period.end, lang) : undefined;
-  return end ? `${start} — ${end}` : start;
+  return end ? `${start} – ${end}` : start;
 }

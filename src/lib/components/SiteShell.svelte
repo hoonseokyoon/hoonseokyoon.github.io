@@ -20,19 +20,16 @@
 </script>
 
 <a class="skip-link" href="#main-content">{labels.skipToContent}</a>
-<div class="site-shell">
+<div class="shell">
   <header class="site-header">
-    <a class="brand" href={home} aria-label={lang === 'ko' ? 'Hoonseok Yoon 홈' : 'Hoonseok Yoon home'}>
-      <span class="brand-name">Hoonseok Yoon</span>
-      <span class="brand-context">{labels.personalRecord}</span>
-    </a>
+    <a class="brand" href={home}>Hoonseok Yoon</a>
 
-    <div class="header-actions">
-      <nav class="primary-nav" aria-label={labels.primaryNavigation}>
+    <div class="header-end">
+      <nav class="site-nav" aria-label={labels.primaryNavigation}>
         <a href={timeline} aria-current={isCurrent(timeline) ? 'page' : undefined}>{labels.timeline}</a>
         <a href={projects} aria-current={isCurrent(projects) ? 'page' : undefined}>{labels.projects}</a>
         <a href={outputs} aria-current={isCurrent(outputs) ? 'page' : undefined}>{labels.outputs}</a>
-        <a class="knowledge-nav" href={tokamakHref(lang)}>{labels.knowledge}<span aria-hidden="true"> ↗</span></a>
+        <a href={tokamakHref(lang)}>{labels.knowledge}<span class="ext" aria-hidden="true"> ↗</span></a>
       </nav>
       <LanguageSwitcher {lang} />
     </div>

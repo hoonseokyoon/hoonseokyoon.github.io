@@ -1,74 +1,61 @@
 <script lang="ts">
-  import { formatPeriod } from '$lib/format';
+  import { tabularPeriod } from '$lib/format';
   import { localizedHref } from '$lib/navigation';
   import type { PublicOutput, PublicProject, PublicTimelineEvent } from '$lib/content/public';
   import type { Locale } from '$lib/site';
   import { ui } from '$lib/ui';
-  import KnowledgePanel from './KnowledgePanel.svelte';
+  import KnowledgeLinks from './KnowledgeLinks.svelte';
 
   let {
     events,
-    projects,
-    outputs,
+    projects = [],
+    outputs = [],
     lang,
     headingLevel = 2
   }: {
     events: PublicTimelineEvent[];
-    projects: PublicProject[];
-    outputs: PublicOutput[];
+    projects?: PublicProject[];
+    outputs?: PublicOutput[];
     lang: Locale;
     headingLevel?: 2 | 3;
   } = $props();
   const labels = $derived(ui[lang]);
   const headingTag = $derived(headingLevel === 2 ? 'h2' : 'h3');
-
-  function projectTitle(project: PublicProject) {
-    return project.content.title;
-  }
-
-  function outputTitle(output: PublicOutput) {
-    return output.content.title;
-  }
 </script>
 
-<ol class="timeline-list">
+<ol class="ledger">
   {#each events as event (event.id)}
+    {@const period = tabularPeriod(event.period, labels.present)}
     {@const relatedProjects = projects.filter((project) => event.projectIds.includes(project.id))}
     {@const relatedOutputs = outputs.filter((output) => event.outputIds.includes(output.id))}
-    <li class="timeline-item" id={event.id} lang={event.locale}>
-      <div class="timeline-period">
-        <time>{formatPeriod(event.period, lang, labels.present)}</time>
+    <li class="ledger-row" id={event.id} lang={event.locale}>
+      <div class="ledger-when">
+        <time datetime={event.period.start}>{period.start}</time>
+        {#if period.end}<span>– {period.end}</span>{/if}
+        <span class="kind">{labels.eventKind[event.kind]}</span>
       </div>
-      <article class="timeline-record">
-        <div class="record-meta">
-          <span>{labels.eventKind[event.kind]}</span>
-          {#if event.isFallback}<span class="language-badge">{event.locale.toUpperCase()}</span>{/if}
-        </div>
-        <svelte:element this={headingTag}>{event.content.title}</svelte:element>
+      <div class="ledger-body">
+        <svelte:element this={headingTag}>
+          {event.content.title}{#if event.isFallback}<span class="lang-note">{event.locale.toUpperCase()}</span>{/if}
+        </svelte:element>
         {#if event.content.role || event.content.organization}
-          <p class="record-byline">
-            {[event.content.role, event.content.organization].filter(Boolean).join(' · ')}
+          <p class="entry-byline">
+            {[event.content.role, event.content.organization, event.content.location].filter(Boolean).join(' · ')}
           </p>
         {/if}
-        <p>{event.content.summary}</p>
+        <p class="entry-summary">{event.content.summary}</p>
         {#if relatedProjects.length || relatedOutputs.length}
-          <ul class="record-links">
+          <ul class="inline-links">
             {#each relatedProjects as project}
-              <li><a href={localizedHref(lang, `projects/${project.id}`)}>{projectTitle(project)}</a></li>
+              <li><a href={localizedHref(lang, `projects/${project.id}`)}>{project.content.title}</a></li>
             {/each}
             {#each relatedOutputs as output}
-              <li><a href={`${localizedHref(lang, 'outputs')}#${output.id}`}>{outputTitle(output)}</a></li>
+              <li><a href={`${localizedHref(lang, 'outputs')}#${output.id}`}>{output.content.title}</a></li>
             {/each}
           </ul>
         {/if}
-        <KnowledgePanel
-          links={event.knowledgeLinks}
-          {lang}
-          headingId={`timeline-${event.id}-knowledge-title`}
-          headingLevel={headingLevel === 2 ? 3 : 4}
-          variant="compact"
-        />
-      </article>
+        <KnowledgeLinks links={event.knowledgeLinks} {lang} />
+      </div>
     </li>
   {/each}
 </ol>

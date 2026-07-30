@@ -12,10 +12,10 @@
 </script>
 
 <PageMeta {title} description={labels.timelineDescription} {...metadata} />
-<PageHeader eyebrow="CHRONOLOGY" title={labels.timeline} description={labels.timelineDescription} />
+<PageHeader title={labels.timeline} description={labels.timelineDescription} />
 
 {#if data.timeline.length}
   <TimelineList events={data.timeline} projects={data.projects} outputs={data.outputs} lang={data.lang} />
 {:else}
-  <p class="empty-state">{labels.noPublishedTimeline}</p>
+  <p class="empty">{labels.noPublishedTimeline}</p>
 {/if}

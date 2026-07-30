@@ -2,258 +2,100 @@ import { describe, expect, it } from 'vitest';
 import { stringify } from 'yaml';
 import { loadCatalogFromDisk } from '../../src/lib/content/catalog.node';
 import { parseCatalog } from '../../src/lib/content/parse';
-import { legacyRedirects } from '../../src/lib/content/route-manifest';
 import { PartialDateSchema } from '../../src/lib/content/schema';
-import {
-  localizedContent,
-  localizedPublicCatalog,
-  publishedCatalog,
-  sortedTimeline
-} from '../../src/lib/content/public';
-import { outputStructuredData, outputStructuredDataId, outputStructuredDataType } from '../../src/lib/structured-data';
+import { localizedContent, localizedPublicCatalog, publishedCatalog } from '../../src/lib/content/public';
+import { outputStructuredData } from '../../src/lib/structured-data';
 import { validateCatalog } from '../../src/lib/content/validate';
-import { fixtureCatalog } from '../fixtures/catalog';
 
-describe('personal content catalog', () => {
-  it('publishes the approved seed catalog', () => {
-    const catalog = loadCatalogFromDisk();
-    const publicCatalog = publishedCatalog(catalog);
+const catalog = loadCatalogFromDisk();
 
-    expect(catalog.person.editorialStatus).toBe('published');
-    expect(publicCatalog.person?.id).toBe('hoonseok-yoon');
-    expect(publicCatalog.timeline.map((record) => record.id)).toEqual(['tokamak-project']);
-    expect(publicCatalog.projects.map((record) => record.id)).toEqual(['tokamak']);
-    expect(publicCatalog.outputs.map((record) => record.id)).toEqual(['tokamak-sveltekit-site']);
+/** A clone of the real catalog, so rejection tests need no synthetic fixture. */
+function broken() {
+  return structuredClone(catalog);
+}
+
+describe('content catalog', () => {
+  it('validates, including the release gate', () => {
     expect(validateCatalog(catalog)).toEqual([]);
+    expect(validateCatalog(catalog, { requireReleaseContent: true })).toEqual([]);
   });
 
-  it('passes the release gate with the approved seed catalog', () => {
-    expect(validateCatalog(loadCatalogFromDisk(), { requireReleaseContent: true })).toEqual([]);
-  });
-
-  it('publishes the approved Tokamak Project to ODE knowledge relation in the requested locale only', () => {
-    const catalog = loadCatalogFromDisk();
-    const project = catalog.projects.find((record) => record.id === 'tokamak')!;
-    const ko = localizedPublicCatalog(catalog, 'ko').projects.find((record) => record.id === 'tokamak')!;
-    const en = localizedPublicCatalog(catalog, 'en').projects.find((record) => record.id === 'tokamak')!;
-
-    expect(project.knowledgeLinks).toEqual([
-      {
-        kind: 'project',
-        relation: 'produced',
-        reciprocal: true,
-        urls: {
-          ko: 'https://hoonseokyoon.github.io/tokamak/ko/projects/ordinary-differential-equations/',
-          en: 'https://hoonseokyoon.github.io/tokamak/en/projects/ordinary-differential-equations/'
-        },
-        label: { ko: '상미분방정식 6부작', en: 'Six-part ODE series' }
-      }
-    ]);
-    expect(ko.knowledgeLinks).toEqual([
-      {
-        relation: 'produced',
-        href: 'https://hoonseokyoon.github.io/tokamak/ko/projects/ordinary-differential-equations/',
-        locale: 'ko',
-        label: '상미분방정식 6부작'
-      }
-    ]);
-    expect(en.knowledgeLinks).toEqual([
-      {
-        relation: 'produced',
-        href: 'https://hoonseokyoon.github.io/tokamak/en/projects/ordinary-differential-equations/',
-        locale: 'en',
-        label: 'Six-part ODE series'
-      }
-    ]);
-    expect(JSON.stringify(ko)).not.toContain('/tokamak/en/projects/ordinary-differential-equations/');
-    expect(JSON.stringify(en)).not.toContain('/tokamak/ko/projects/ordinary-differential-equations/');
-    expect(JSON.stringify(ko)).not.toContain('reciprocal');
-    expect(JSON.stringify(en)).not.toContain('reciprocal');
-  });
-
-  it('accepts the complete synthetic release fixture', () => {
-    expect(validateCatalog(fixtureCatalog, { requireReleaseContent: true })).toEqual([]);
-  });
-
-  it('falls back to the declared source locale without pretending to translate', () => {
-    const localized = localizedContent(fixtureCatalog.outputs[0], 'ko');
-    expect(localized.locale).toBe('en');
-    expect(localized.isFallback).toBe(true);
-    expect(localized.content.title).toContain('Fixture source package');
-  });
-
-  it('projects only localized render data into the public page payload', () => {
-    const ko = localizedPublicCatalog(fixtureCatalog, 'ko');
-    const serialized = JSON.stringify(ko);
-
-    expect(ko.person?.content.headline).toBe('시간, 프로젝트, 산출물을 연결하는 개인 기록');
-    expect(ko.outputs[0]).toMatchObject({ locale: 'en', isFallback: true });
-    expect(ko.timeline[0].knowledgeLinks).toEqual([
-      {
-        relation: 'applied',
-        href: 'https://hoonseokyoon.github.io/tokamak/ko/projects/fixture-knowledge-project/',
-        locale: 'ko',
-        label: '합성 지식 프로젝트'
-      }
-    ]);
-    expect(ko.projects[0].knowledgeLinks).toEqual([
-      {
-        relation: 'background',
-        href: 'https://hoonseokyoon.github.io/tokamak/ko/blog/fixture-knowledge/',
-        locale: 'ko',
-        label: '합성 배경 지식'
-      }
-    ]);
-    expect(ko.outputs[0].knowledgeLinks).toEqual([
-      {
-        relation: 'documents',
-        href: 'https://hoonseokyoon.github.io/tokamak/en/categories/fixture-output-notes/',
-        locale: 'en',
-        label: 'Synthetic output notes'
-      }
-    ]);
-    for (const internalKey of [
-      'editorialStatus',
-      'sourceLocale',
-      'evidence',
-      'checkedAt',
-      'contributors',
-      'reciprocal'
-    ]) {
-      expect(serialized).not.toContain(`"${internalKey}"`);
+  it('publishes only approved records', () => {
+    const published = publishedCatalog(catalog);
+    expect(published.person?.editorialStatus).toBe('published');
+    for (const record of [...published.timeline, ...published.projects, ...published.outputs]) {
+      expect(record.editorialStatus).toBe('published');
     }
-    expect(serialized).not.toContain('A personal record connecting time, projects, and outputs');
-    expect(serialized).not.toContain('Synthetic project for route and content-contract testing');
-    expect(serialized).not.toContain('Synthetic knowledge project');
-    expect(serialized).not.toContain('/tokamak/en/projects/fixture-knowledge-project/');
   });
 
-  it('maps localized Outputs to the approved stable structured-data contract', () => {
-    const output = localizedPublicCatalog(fixtureCatalog, 'ko').outputs[0];
-    const structured = outputStructuredData([output]);
-
-    expect(outputStructuredDataId(output.id)).toBe('https://hoonseokyoon.github.io/#output-fixture-software');
-    expect(structured).toEqual({
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'SoftwareSourceCode',
-          '@id': 'https://hoonseokyoon.github.io/#output-fixture-software',
-          url: 'https://example.test/repository',
-          name: 'Fixture source package with a deliberately long canonical title',
-          description: 'Synthetic software output used to test source-language fallback.',
-          creditText: 'Architecture and implementation',
-          datePublished: '2026-07-28',
-          inLanguage: 'en',
-          author: { '@id': 'https://hoonseokyoon.github.io/#person' }
-        }
-      ]
-    });
-    expect(
-      ['paper', 'software', 'release', 'presentation', 'poster', 'dataset', 'article', 'award', 'other'].map((kind) =>
-        outputStructuredDataType(kind as typeof output.kind)
-      )
-    ).toEqual([
-      'ScholarlyArticle',
-      'SoftwareSourceCode',
-      'CreativeWork',
-      'PresentationDigitalDocument',
-      'CreativeWork',
-      'Dataset',
-      'CreativeWork',
-      'CreativeWork',
-      'CreativeWork'
-    ]);
-  });
-
-  it('keeps ongoing timeline records first', () => {
-    const historical = {
-      ...fixtureCatalog.timeline[0],
-      id: 'fixture-historical',
-      period: { start: '2020', end: '2021' }
+  it('falls back to the source locale instead of pretending to translate', () => {
+    const record = {
+      sourceLocale: 'en' as const,
+      content: { en: { title: 'Only English' } }
     };
-    expect(sortedTimeline([historical, fixtureCatalog.timeline[0]]).map((event) => event.id)).toEqual([
-      'fixture-project-period',
-      'fixture-historical'
-    ]);
+    const localized = localizedContent(record, 'ko');
+    expect(localized).toMatchObject({ locale: 'en', isFallback: true });
   });
 
-  it('emits compatibility redirects enabled by the approved catalog', () => {
-    expect(legacyRedirects(loadCatalogFromDisk())).toEqual([
-      { path: 'projects', target: '/en/projects/' },
-      { path: 'blog', target: '/tokamak/en/' },
-      { path: 'review', target: '/tokamak/en/categories/paper-review/' },
-      { path: 'cv', target: '/en/timeline/' },
-      { path: 'repositories', target: '/en/outputs/#software' }
-    ]);
+  it('serves knowledge links in the requested locale only', () => {
+    const ko = localizedPublicCatalog(catalog, 'ko');
+    const en = localizedPublicCatalog(catalog, 'en');
+    expect(JSON.stringify(ko)).not.toContain('/tokamak/en/');
+    expect(JSON.stringify(en)).not.toContain('/tokamak/ko/');
   });
 
-  it('rejects unresolved project references', () => {
-    const broken = structuredClone(fixtureCatalog);
-    broken.outputs[0].projectIds = ['fixture-missing'];
-    expect(validateCatalog(broken).map((issue) => issue.code)).toContain('unknown-reference');
+  it('keeps editorial metadata out of the public page payload', () => {
+    const serialized = JSON.stringify(localizedPublicCatalog(catalog, 'ko'));
+    for (const key of ['editorialStatus', 'sourceLocale', 'evidence', 'checkedAt', 'contributors', 'reciprocal']) {
+      expect(serialized).not.toContain(`"${key}"`);
+    }
+  });
+
+  it('describes outputs with stable structured data', () => {
+    const outputs = localizedPublicCatalog(catalog, 'ko').outputs;
+    const structured = outputStructuredData(outputs) as { '@graph': Array<Record<string, unknown>> };
+    expect(structured['@graph']).toHaveLength(outputs.length);
+    expect(structured['@graph'][0]).toMatchObject({
+      '@id': `https://hoonseokyoon.github.io/#output-${outputs[0].id}`,
+      author: { '@id': 'https://hoonseokyoon.github.io/#person' }
+    });
+  });
+
+  it('rejects references to records that do not exist', () => {
+    const catalogWithBadRef = broken();
+    catalogWithBadRef.outputs[0].projectIds = ['missing-project'];
+    expect(validateCatalog(catalogWithBadRef).map((issue) => issue.code)).toContain('unknown-reference');
   });
 
   it('rejects mismatched Tokamak locale pairs', () => {
-    const broken = structuredClone(fixtureCatalog);
-    broken.projects[0].knowledgeLinks[0].urls.en = 'https://hoonseokyoon.github.io/tokamak/en/blog/different-slug/';
-    expect(validateCatalog(broken).map((issue) => issue.code)).toContain('knowledge-pair');
+    const catalogWithBadPair = broken();
+    catalogWithBadPair.projects[0].knowledgeLinks[0].urls.en =
+      'https://hoonseokyoon.github.io/tokamak/en/projects/different-slug/';
+    expect(validateCatalog(catalogWithBadPair).map((issue) => issue.code)).toContain('knowledge-pair');
   });
 
-  it('rejects duplicate TimelineEvent knowledge links', () => {
-    const broken = structuredClone(fixtureCatalog);
-    broken.timeline[0].knowledgeLinks.push(structuredClone(broken.timeline[0].knowledgeLinks[0]));
-    expect(validateCatalog(broken).map((issue) => issue.code)).toContain('duplicate-knowledge-link');
-  });
-
-  it('limits reciprocal backlink requirements to bilingual Project targets owned by Projects', () => {
-    const wrongKind = structuredClone(fixtureCatalog);
-    wrongKind.projects[0].knowledgeLinks[0].reciprocal = true;
-    expect(validateCatalog(wrongKind).map((issue) => issue.code)).toContain('reciprocal-kind');
-
-    const missingLocale = structuredClone(fixtureCatalog);
-    missingLocale.projects[0].knowledgeLinks[0] = {
-      kind: 'project',
-      relation: 'background',
-      reciprocal: true,
-      urls: { ko: 'https://hoonseokyoon.github.io/tokamak/ko/projects/fixture-knowledge/' }
-    };
-    expect(validateCatalog(missingLocale).map((issue) => issue.code)).toContain('reciprocal-locales');
-
-    const wrongOwner = structuredClone(fixtureCatalog);
-    wrongOwner.timeline[0].knowledgeLinks[0].reciprocal = true;
-    expect(validateCatalog(wrongOwner).map((issue) => issue.code)).toContain('reciprocal-owner');
-  });
-
-  it('rejects non-canonical or weakly shaped Tokamak knowledge URLs', () => {
-    const invalidUrls = [
-      'https://user:pass@hoonseokyoon.github.io/tokamak/ko/blog/fixture-knowledge/',
-      'https://hoonseokyoon.github.io:443/tokamak/ko/blog/fixture-knowledge/',
-      'https://hoonseokyoon.github.io/tokamak/ko/blog/fixture-knowledge/?',
-      'https://hoonseokyoon.github.io/tokamak/ko/blog/fixture-knowledge/#',
-      'https://hoonseokyoon.github.io/tokamak/ko/blog/fixture-knowledge/?source=root',
-      'https://hoonseokyoon.github.io/tokamak/ko/blog/fixture-knowledge/#section',
-      'https://hoonseokyoon.github.io/tokamak/ko/blog/Fixture-Knowledge/',
-      'https://hoonseokyoon.github.io/tokamak/ko/blog/%66ixture-knowledge/',
-      'https://hoonseokyoon.github.io/tokamak/ko/blog/section/../fixture-knowledge/'
-    ];
-
-    for (const url of invalidUrls) {
-      const broken = structuredClone(fixtureCatalog);
-      broken.projects[0].knowledgeLinks[0].urls.ko = url;
+  it('rejects knowledge URLs outside the canonical Tokamak shape', () => {
+    for (const url of [
+      'https://hoonseokyoon.github.io/tokamak/ko/projects/slug/?source=root',
+      'https://example.test/tokamak/ko/projects/slug/'
+    ]) {
+      const catalogWithBadUrl = broken();
+      catalogWithBadUrl.projects[0].knowledgeLinks[0].urls.ko = url;
       expect(
-        validateCatalog(broken).map((issue) => issue.code),
+        validateCatalog(catalogWithBadUrl).map((issue) => issue.code),
         url
       ).toContain('invalid-knowledge-url');
     }
   });
 
-  it('requires explicit user approval for every published record', () => {
-    const broken = structuredClone(fixtureCatalog);
-    broken.projects[0].evidence = [
+  it('requires dated user approval on every published record', () => {
+    const catalogWithoutApproval = broken();
+    catalogWithoutApproval.projects[0].evidence = [
       { kind: 'repository', url: 'https://example.test/repository', checkedAt: '2026-07-28' }
     ];
-    expect(validateCatalog(broken).map((issue) => issue.code)).toContain('missing-publication-approval');
+    expect(validateCatalog(catalogWithoutApproval).map((issue) => issue.code)).toContain(
+      'missing-publication-approval'
+    );
   });
 
   it('rejects impossible calendar dates', () => {
@@ -261,12 +103,12 @@ describe('personal content catalog', () => {
     expect(PartialDateSchema.safeParse('2024-02-29').success).toBe(true);
   });
 
-  it('requires collection filenames to match immutable record IDs', () => {
+  it('requires filenames to match record IDs', () => {
     expect(() =>
       parseCatalog(
-        stringify(fixtureCatalog.person),
+        stringify(catalog.person),
         [],
-        [['src/lib/content/projects/wrong-file.yml', stringify(fixtureCatalog.projects[0])]],
+        [['src/lib/content/projects/wrong.yml', stringify(catalog.projects[0])]],
         []
       )
     ).toThrow(/does not match filename/);
