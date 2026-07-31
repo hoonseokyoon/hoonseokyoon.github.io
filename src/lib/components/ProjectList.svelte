@@ -10,9 +10,17 @@
     projects,
     lang,
     showKind = true,
-    showKnowledge = false
-  }: { projects: PublicProject[]; lang: Locale; showKind?: boolean; showKnowledge?: boolean } = $props();
+    showKnowledge = false,
+    headingLevel = 2
+  }: {
+    projects: PublicProject[];
+    lang: Locale;
+    showKind?: boolean;
+    showKnowledge?: boolean;
+    headingLevel?: 2 | 3;
+  } = $props();
   const labels = $derived(ui[lang]);
+  const headingTag = $derived(headingLevel === 2 ? 'h2' : 'h3');
 </script>
 
 <ol class="ledger">
@@ -25,10 +33,10 @@
         {#if showKind}<span class="kind">{labels.lifecycle[project.lifecycle]}</span>{/if}
       </div>
       <div class="ledger-body">
-        <h2>
+        <svelte:element this={headingTag}>
           <a href={localizedHref(lang, `projects/${project.id}`)}>{project.content.title}</a
           >{#if project.isFallback}<span class="lang-note">{project.locale.toUpperCase()}</span>{/if}
-        </h2>
+        </svelte:element>
         <p class="entry-summary">{project.content.summary}</p>
         <p class="entry-note"><span class="role-label">{labels.role}</span> {project.content.role}</p>
         {#if showKnowledge}

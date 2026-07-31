@@ -21,7 +21,7 @@
     {#if projects.length}
       <section class="group" aria-labelledby={`lifecycle-${lifecycle}`}>
         <h2 class="label" id={`lifecycle-${lifecycle}`}>{labels.lifecycle[lifecycle]}</h2>
-        <ProjectList {projects} lang={data.lang} showKind={false} showKnowledge />
+        <ProjectList {projects} lang={data.lang} showKind={false} showKnowledge headingLevel={3} />
       </section>
     {/if}
   {/each}

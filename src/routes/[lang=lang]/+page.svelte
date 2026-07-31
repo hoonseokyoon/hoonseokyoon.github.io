@@ -103,7 +103,7 @@
         <h2 class="label" id="projects-title">{labels.selectedProjects}</h2>
         <a class="more" href={localizedHref(data.lang, 'projects')}>{labels.allProjects} →</a>
       </div>
-      <ProjectList projects={data.projects} lang={data.lang} />
+      <ProjectList projects={data.projects} lang={data.lang} headingLevel={3} />
     </section>
   {/if}
 

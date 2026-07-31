@@ -17,10 +17,23 @@ concurrency:
 
 jobs:
   build:
-    name: Build
+    name: Verify and build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
+      # workflow_dispatch can select any ref, so re-assert the branch here
+      # rather than relying only on the Pages environment policy.
+      - name: Require the default branch
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          if [[ "$REF_TYPE" != "branch" || "$REF_NAME" != "$DEFAULT_BRANCH" ]]; then
+            echo "::error::Deployments must run on $DEFAULT_BRANCH, got $REF_TYPE $REF_NAME"
+            exit 1
+          fi
+
       - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v6
@@ -30,9 +43,11 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run validate:content -- --release
+      - run: npx playwright install --with-deps chromium
 
-      - run: npm run build
+      # The full suite, not just a build: nothing reaches production without
+      # passing type checks, content validation, unit tests, and browser tests.
+      - run: npm run verify
 
       - uses: actions/configure-pages@v6
 

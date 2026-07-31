@@ -39,8 +39,10 @@ test('project detail links out to the related Tokamak knowledge', async ({ page 
 test('index pages render their records', async ({ page }) => {
   await page.goto('/ko/timeline/');
   await expect(page.getByRole('heading', { level: 2, name: 'Tokamak 프로젝트 시작' })).toBeVisible();
+  // Records nest under their group heading, so they are h3 here.
   await page.goto('/ko/projects/');
-  await expect(page.getByRole('heading', { level: 2, name: 'Tokamak' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: '진행 중' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 3, name: 'Tokamak' })).toBeVisible();
 });
 
 test('layout survives a 320px viewport', async ({ page }) => {
