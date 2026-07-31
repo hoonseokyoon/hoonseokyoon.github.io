@@ -25,18 +25,18 @@
 </script>
 
 <PageMeta {title} description={labels.outputsDescription} {...metadata} {jsonLd} />
-<PageHeader eyebrow="AUTHORED RESULTS" title={labels.outputs} description={labels.outputsDescription} />
+<PageHeader title={labels.outputs} description={labels.outputsDescription} />
 
 {#if data.outputs.length}
   {#each groups as [kind, anchor]}
     {@const outputs = data.outputs.filter((output) => output.kind === kind)}
     {#if outputs.length}
-      <section class="output-group" id={anchor} aria-labelledby={`${anchor}-title`}>
-        <h2 id={`${anchor}-title`}>{labels.outputKind[kind]}</h2>
-        <OutputList {outputs} projects={data.projects} lang={data.lang} />
+      <section class="group" id={anchor} aria-labelledby={`${anchor}-title`}>
+        <h2 class="label" id={`${anchor}-title`}>{labels.outputKind[kind]}</h2>
+        <OutputList {outputs} projects={data.projects} lang={data.lang} showKind={false} />
       </section>
     {/if}
   {/each}
 {:else}
-  <p class="empty-state">{labels.noPublishedOutputs}</p>
+  <p class="empty">{labels.noPublishedOutputs}</p>
 {/if}

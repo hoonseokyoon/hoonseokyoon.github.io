@@ -1,8 +1,10 @@
 <script lang="ts">
   import ContentGate from '$lib/components/ContentGate.svelte';
+  import KnowledgeLinks from '$lib/components/KnowledgeLinks.svelte';
   import OutputList from '$lib/components/OutputList.svelte';
   import PageMeta from '$lib/components/PageMeta.svelte';
-  import ProjectCard from '$lib/components/ProjectCard.svelte';
+  import ProjectList from '$lib/components/ProjectList.svelte';
+  import TimelineList from '$lib/components/TimelineList.svelte';
   import { localizedMetadata } from '$lib/metadata';
   import { localizedHref, tokamakHref } from '$lib/navigation';
   import { personId, websiteId } from '$lib/site';
@@ -27,7 +29,8 @@
               name: person.content.name,
               description: person.content.summary,
               url: person.canonicalUrl,
-              sameAs: person.sameAs
+              sameAs: person.sameAs,
+              ...(person.content.focus.length ? { knowsAbout: person.content.focus } : {})
             },
             {
               '@type': 'WebSite',
@@ -41,76 +44,104 @@
         }
       : undefined
   );
+
+  function profileLabel(href: string) {
+    const url = new URL(href);
+    return `${url.hostname.replace(/^www\./, '')}${url.pathname.replace(/\/$/, '')}`;
+  }
 </script>
 
 <PageMeta {title} {description} {...metadata} {jsonLd} />
 
 {#if person}
-  <section class="home-hero">
-    <div class="person-hero" lang={person.locale}>
-      <p class="eyebrow">{labels.homeEyebrow}</p>
-      <h1>{person.content.name}</h1>
-      <p class="person-headline">{person.content.headline}</p>
-      <p class="person-summary">{person.content.summary}</p>
-      {#if person.sameAs.length || person.contacts.length}
-        <ul class="profile-links">
-          {#each person.sameAs as href}
-            <li><a {href}>{new URL(href).hostname.replace('www.', '')}<span aria-hidden="true"> ↗</span></a></li>
-          {/each}
-          {#each person.contacts as contact}
-            <li><a href={contact.url}>{contact.kind}</a></li>
-          {/each}
-        </ul>
-      {/if}
-    </div>
-
-    {#if data.now.length}
-      <aside class="now-panel" aria-labelledby="now-title">
-        <h2 id="now-title">{labels.now}</h2>
-        <ul class="now-list">
-          {#each data.now as event}
-            <li lang={event.locale}>
-              <strong>{event.content.title}</strong>
-              <p>{event.content.summary}</p>
-            </li>
-          {/each}
-        </ul>
-        <a href={localizedHref(data.lang, 'timeline')}>{labels.allTimeline} →</a>
-      </aside>
+  <header class="masthead" lang={person.locale}>
+    <p class="label">{labels.mastheadLabel}</p>
+    <h1 class="masthead-name">{person.content.name}</h1>
+    <p class="masthead-headline">{person.content.headline}</p>
+    <p class="masthead-summary">{person.content.summary}</p>
+    {#if person.sameAs.length || person.contacts.length}
+      <ul class="contact-line">
+        {#each person.contacts as contact}
+          <li><a href={contact.url}>{contact.url.replace(/^mailto:/, '')}</a></li>
+        {/each}
+        {#each person.sameAs as href}
+          <li><a {href}>{profileLabel(href)}<span class="ext" aria-hidden="true"> ↗</span></a></li>
+        {/each}
+      </ul>
     {/if}
-  </section>
+  </header>
+
+  {#if person.content.focus.length}
+    <section class="section" aria-labelledby="focus-title">
+      <div class="section-head"><h2 class="label" id="focus-title">{labels.focus}</h2></div>
+      <ul class="focus-list">
+        {#each person.content.focus as item}<li>{item}</li>{/each}
+      </ul>
+    </section>
+  {/if}
+
+  {#if data.now.length}
+    <section class="section" aria-labelledby="now-title">
+      <div class="section-head"><h2 class="label" id="now-title">{labels.now}</h2></div>
+      <TimelineList events={data.now} projects={data.allProjects} lang={data.lang} headingLevel={3} />
+    </section>
+  {/if}
+
+  {#if data.experience.length}
+    <section class="section" aria-labelledby="experience-title">
+      <div class="section-head">
+        <h2 class="label" id="experience-title">{labels.experience}</h2>
+        <a class="more" href={localizedHref(data.lang, 'timeline')}>{labels.allTimeline} →</a>
+      </div>
+      <TimelineList events={data.experience} projects={data.allProjects} lang={data.lang} headingLevel={3} />
+    </section>
+  {/if}
 
   {#if data.projects.length}
-    <section class="home-section" aria-labelledby="selected-projects-title">
-      <div class="section-heading">
-        <h2 id="selected-projects-title">{labels.selectedProjects}</h2>
-        <a href={localizedHref(data.lang, 'projects')}>{labels.allProjects} →</a>
+    <section class="section" aria-labelledby="projects-title">
+      <div class="section-head">
+        <h2 class="label" id="projects-title">{labels.selectedProjects}</h2>
+        <a class="more" href={localizedHref(data.lang, 'projects')}>{labels.allProjects} →</a>
       </div>
-      <div class="project-grid">
-        {#each data.projects as project}
-          <ProjectCard {project} outputs={data.outputs} lang={data.lang} />
-        {/each}
-      </div>
+      <ProjectList projects={data.projects} lang={data.lang} headingLevel={3} />
     </section>
   {/if}
 
   {#if data.outputs.length}
-    <section class="home-section" aria-labelledby="recent-outputs-title">
-      <div class="section-heading">
-        <h2 id="recent-outputs-title">{labels.recentOutputs}</h2>
-        <a href={localizedHref(data.lang, 'outputs')}>{labels.allOutputs} →</a>
+    <section class="section" aria-labelledby="outputs-title">
+      <div class="section-head">
+        <h2 class="label" id="outputs-title">{labels.recentOutputs}</h2>
+        <a class="more" href={localizedHref(data.lang, 'outputs')}>{labels.allOutputs} →</a>
       </div>
       <OutputList outputs={data.outputs} projects={data.allProjects} lang={data.lang} />
     </section>
   {/if}
 
-  <section class="home-section knowledge-gateway" aria-labelledby="knowledge-gateway-title">
-    <div>
-      <p class="eyebrow">TOKAMAK</p>
-      <h2 id="knowledge-gateway-title">{labels.knowledgeTitle}</h2>
-      <p>{labels.knowledgeDescription}</p>
+  {#if person.content.expertise.length}
+    <section class="section" aria-labelledby="expertise-title">
+      <div class="section-head"><h2 class="label" id="expertise-title">{labels.expertise}</h2></div>
+      <dl class="expertise">
+        {#each person.content.expertise as group}
+          <div>
+            <dt>{group.label}</dt>
+            <dd>
+              {#each group.items as item, index}{#if index > 0}<span class="sep"> · </span>{/if}{item}{/each}
+            </dd>
+          </div>
+        {/each}
+      </dl>
+    </section>
+  {/if}
+
+  <section class="section" aria-labelledby="knowledge-title">
+    <div class="section-head">
+      <h2 class="label" id="knowledge-title">{labels.knowledge}</h2>
+      <a class="more" href={tokamakHref(data.lang)}>{labels.visitKnowledge} ↗</a>
     </div>
-    <a class="button-link" href={tokamakHref(data.lang)}>{labels.visitKnowledge} ↗</a>
+    <div class="knowledge-note">
+      <p>{labels.knowledgeNote}</p>
+      <KnowledgeLinks links={data.knowledgeLinks} lang={data.lang} showLabel={false} />
+    </div>
   </section>
 {:else}
   <ContentGate lang={data.lang} />

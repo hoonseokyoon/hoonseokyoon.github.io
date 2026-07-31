@@ -7,10 +7,46 @@ content:
     name: Hoonseok Yoon
     headline: 개인 이력과 프로젝트 기록
     summary: 확인된 이력, 프로젝트, 산출물과 그 과정에서 축적한 지식을 연결해 기록합니다.
+    focus:
+      - 지식 구조와 정보 설계
+      - 정적 사이트 아키텍처
+      - 이중 언어 콘텐츠 모델
+    expertise:
+      - label: 언어
+        items:
+          - TypeScript
+          - JavaScript
+      - label: 프레임워크
+        items:
+          - SvelteKit
+      - label: 도구
+        items:
+          - Git
+          - GitHub Actions
+          - Playwright
+          - Vitest
   en:
     name: Hoonseok Yoon
     headline: A record of personal history and projects
     summary: A connected record of verified history, projects, outputs, and the knowledge built along the way.
+    focus:
+      - Knowledge structure and information architecture
+      - Static site architecture
+      - Bilingual content models
+    expertise:
+      - label: Languages
+        items:
+          - TypeScript
+          - JavaScript
+      - label: Frameworks
+        items:
+          - SvelteKit
+      - label: Tooling
+        items:
+          - Git
+          - GitHub Actions
+          - Playwright
+          - Vitest
 sameAs:
   - https://github.com/hoonseokyoon
 contacts: []

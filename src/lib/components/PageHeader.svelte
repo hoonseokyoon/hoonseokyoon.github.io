@@ -1,9 +1,9 @@
 <script lang="ts">
-  let { eyebrow, title, description }: { eyebrow?: string; title: string; description: string } = $props();
+  let { label, title, description }: { label?: string; title: string; description: string } = $props();
 </script>
 
 <header class="page-header">
-  {#if eyebrow}<p class="eyebrow">{eyebrow}</p>{/if}
+  {#if label}<p class="label">{label}</p>{/if}
   <h1>{title}</h1>
-  <p class="lede">{description}</p>
+  <p class="page-intro">{description}</p>
 </header>

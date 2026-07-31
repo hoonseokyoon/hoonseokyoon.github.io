@@ -11,8 +11,15 @@
   <link rel="canonical" href={absoluteUrl(target)} />
 </svelte:head>
 
-<main class="redirect-page">
-  <h1>Hoonseok Yoon</h1>
-  <p><a href={target}>한국어 개인 기록으로 이동</a></p>
-  <p lang="en"><a href="/en/">Continue to the personal record in English</a></p>
-</main>
+<div class="shell">
+  <main class="site-main">
+    <section class="notice">
+      <p class="label">Hoonseok Yoon</p>
+      <h1>이력 및 연구 기록</h1>
+      <ul class="inline-links">
+        <li><a href={target}>한국어로 계속 →</a></li>
+        <li lang="en"><a href="/en/">Continue in English →</a></li>
+      </ul>
+    </section>
+  </main>
+</div>

@@ -60,11 +60,18 @@ export const KnowledgeLinkSchema = z.object({
   label: LocaleTextSchema.optional()
 });
 
+const ExpertiseGroupSchema = z.object({
+  label: z.string().min(1),
+  items: z.array(z.string().min(1)).min(1)
+});
+
 const PersonContentSchema = z.object({
   name: z.string().min(1),
   headline: z.string().min(1),
   summary: z.string().min(1),
-  imageAlt: z.string().min(1).optional()
+  imageAlt: z.string().min(1).optional(),
+  focus: z.array(z.string().min(1)).default([]),
+  expertise: z.array(ExpertiseGroupSchema).default([])
 });
 
 const TimelineContentSchema = z.object({

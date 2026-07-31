@@ -1,7 +1,7 @@
 <script lang="ts">
   import PageHeader from '$lib/components/PageHeader.svelte';
   import PageMeta from '$lib/components/PageMeta.svelte';
-  import ProjectCard from '$lib/components/ProjectCard.svelte';
+  import ProjectList from '$lib/components/ProjectList.svelte';
   import { localizedMetadata } from '$lib/metadata';
   import { ui } from '$lib/ui';
 
@@ -13,22 +13,18 @@
 </script>
 
 <PageMeta {title} description={labels.projectsDescription} {...metadata} />
-<PageHeader eyebrow="SELECTED WORK" title={labels.projects} description={labels.projectsDescription} />
+<PageHeader title={labels.projects} description={labels.projectsDescription} />
 
 {#if data.projects.length}
   {#each lifecycleOrder as lifecycle}
     {@const projects = data.projects.filter((project) => project.lifecycle === lifecycle)}
     {#if projects.length}
-      <section class="lifecycle-group" aria-labelledby={`lifecycle-${lifecycle}`}>
-        <h2 id={`lifecycle-${lifecycle}`}>{labels.lifecycle[lifecycle]}</h2>
-        <div class="project-grid">
-          {#each projects as project}
-            <ProjectCard {project} outputs={data.outputs} lang={data.lang} />
-          {/each}
-        </div>
+      <section class="group" aria-labelledby={`lifecycle-${lifecycle}`}>
+        <h2 class="label" id={`lifecycle-${lifecycle}`}>{labels.lifecycle[lifecycle]}</h2>
+        <ProjectList {projects} lang={data.lang} showKind={false} showKnowledge headingLevel={3} />
       </section>
     {/if}
   {/each}
 {:else}
-  <p class="empty-state">{labels.noPublishedProjects}</p>
+  <p class="empty">{labels.noPublishedProjects}</p>
 {/if}

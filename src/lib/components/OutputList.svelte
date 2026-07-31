@@ -1,62 +1,53 @@
 <script lang="ts">
-  import { formatPartialDate } from '$lib/format';
+  import { tabularDate } from '$lib/format';
   import { localizedHref } from '$lib/navigation';
   import type { PublicOutput, PublicProject } from '$lib/content/public';
   import type { Locale } from '$lib/site';
   import { ui } from '$lib/ui';
-  import KnowledgePanel from './KnowledgePanel.svelte';
+  import KnowledgeLinks from './KnowledgeLinks.svelte';
 
-  let { outputs, projects, lang }: { outputs: PublicOutput[]; projects: PublicProject[]; lang: Locale } = $props();
+  let {
+    outputs,
+    projects = [],
+    lang,
+    showKind = true
+  }: { outputs: PublicOutput[]; projects?: PublicProject[]; lang: Locale; showKind?: boolean } = $props();
   const labels = $derived(ui[lang]);
-
-  function projectTitle(project: PublicProject) {
-    return project.content.title;
-  }
 </script>
 
-<ul class="output-list">
+<ul class="ledger">
   {#each outputs as output (output.id)}
     {@const primary = output.links.find((link) => link.primary)}
+    {@const secondary = output.links.filter((link) => !link.primary)}
     {@const relatedProjects = projects.filter((project) => output.projectIds.includes(project.id))}
-    <li class="output-item" id={output.id} lang={output.locale}>
-      <time class="output-date" datetime={output.date}>{formatPartialDate(output.date, lang)}</time>
-      <article class="output-record">
-        <div class="record-meta">
-          <span>{labels.outputKind[output.kind]}</span>
-          {#if output.isFallback}<span class="language-badge">{output.locale.toUpperCase()}</span>{/if}
-        </div>
+    <li class="ledger-row" id={output.id} lang={output.locale}>
+      <div class="ledger-when">
+        <time datetime={output.date}>{tabularDate(output.date)}</time>
+        {#if showKind}<span class="kind">{labels.outputKind[output.kind]}</span>{/if}
+      </div>
+      <div class="ledger-body">
         <h3>
           {#if primary}
-            <a href={primary.url}>{output.content.title}<span aria-hidden="true"> ↗</span></a>
+            <a href={primary.url}>{output.content.title}<span class="ext" aria-hidden="true"> ↗</span></a>
           {:else}
             {output.content.title}
-          {/if}
+          {/if}{#if output.isFallback}<span class="lang-note">{output.locale.toUpperCase()}</span>{/if}
         </h3>
-        {#if output.content.venue}<p class="record-byline">{output.content.venue}</p>{/if}
-        {#if output.content.summary}<p>{output.content.summary}</p>{/if}
-        <p class="output-contribution"><strong>{labels.role}:</strong> {output.content.contribution}</p>
-        {#if relatedProjects.length}
-          <ul class="record-links">
+        {#if output.content.venue}<p class="entry-byline">{output.content.venue}</p>{/if}
+        {#if output.content.summary}<p class="entry-summary">{output.content.summary}</p>{/if}
+        <p class="entry-note"><span class="role-label">{labels.role}</span> {output.content.contribution}</p>
+        {#if relatedProjects.length || secondary.length}
+          <ul class="inline-links">
             {#each relatedProjects as project}
-              <li><a href={localizedHref(lang, `projects/${project.id}`)}>{projectTitle(project)}</a></li>
+              <li><a href={localizedHref(lang, `projects/${project.id}`)}>{project.content.title}</a></li>
+            {/each}
+            {#each secondary as link}
+              <li><a href={link.url}>{link.kind}<span class="ext" aria-hidden="true"> ↗</span></a></li>
             {/each}
           </ul>
         {/if}
-        {#if output.links.length > 1}
-          <ul class="secondary-links">
-            {#each output.links.filter((link) => !link.primary) as link}
-              <li><a href={link.url}>{link.kind}</a></li>
-            {/each}
-          </ul>
-        {/if}
-        <KnowledgePanel
-          links={output.knowledgeLinks}
-          {lang}
-          headingId={`output-${output.id}-knowledge-title`}
-          headingLevel={4}
-          variant="compact"
-        />
-      </article>
+        <KnowledgeLinks links={output.knowledgeLinks} {lang} />
+      </div>
     </li>
   {/each}
 </ul>

@@ -4,63 +4,93 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#fbfaf8" />
     <title>페이지를 찾을 수 없습니다 · Hoonseok Yoon</title>
     <style>
       :root {
+        --paper: #fbfaf8;
+        --ink: #1b1a17;
+        --ink-body: #35322c;
+        --ink-faint: #736d61;
+        --rule: #ddd8cd;
+        --rule-strong: #bab3a3;
+        --accent: #8c3a1c;
+      }
+      body {
+        margin: 0;
+        padding: 14vh max(1.25rem, 6vw);
+        background: var(--paper);
+        color: var(--ink-body);
         font-family:
           Pretendard,
           -apple-system,
           BlinkMacSystemFont,
           'Segoe UI',
+          'Noto Sans KR',
           sans-serif;
-        color: #30363d;
-      }
-      body {
-        margin: 0;
-        padding: 12vh max(1rem, 6vw);
+        font-size: 1.0625rem;
+        line-height: 1.7;
       }
       main {
-        max-width: 42rem;
+        max-width: 40rem;
+        padding-top: 0.9rem;
+        border-top: 1px solid var(--ink);
+      }
+      .label {
+        margin: 0 0 0.9rem;
+        color: var(--ink-faint);
+        font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+        font-size: 0.68rem;
+        letter-spacing: 0.14em;
       }
       h1 {
-        color: #171b21;
-        font-size: clamp(2rem, 6vw, 3.5rem);
-        line-height: 1.15;
-        letter-spacing: -0.04em;
+        margin: 0 0 0.75rem;
+        color: var(--ink);
+        font-family: 'Iowan Old Style', Charter, Cambria, Georgia, 'Nanum Myeongjo', 'Noto Serif KR', serif;
+        font-size: clamp(2.1rem, 5vw, 3rem);
+        font-weight: 400;
+        line-height: 1.12;
+        letter-spacing: -0.015em;
+        word-break: keep-all;
       }
       p {
-        line-height: 1.65;
+        margin: 0 0 1rem;
       }
       nav {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.75rem 1.25rem;
-        margin-top: 2rem;
+        gap: 0.35rem 1.1rem;
+        margin-top: 1.75rem;
+        font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+        font-size: 0.74rem;
       }
       a {
-        min-height: 44px;
-        display: inline-flex;
-        align-items: center;
-        color: #075ea8;
-        font-weight: 650;
-        text-underline-offset: 0.17em;
+        color: var(--ink-body);
+        text-decoration: underline;
+        text-decoration-color: var(--rule-strong);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.2em;
+      }
+      a:hover {
+        color: var(--accent);
+        text-decoration-color: var(--accent);
       }
       a:focus-visible {
-        outline: 3px solid #7fb2dc;
+        outline: 2px solid var(--accent);
         outline-offset: 3px;
       }
     </style>
   </head>
   <body>
     <main>
-      <p>404</p>
-      <h1>페이지를 찾을 수 없습니다.</h1>
-      <p>주소가 바뀌었거나 더 이상 제공되지 않는 페이지입니다.</p>
-      <p lang="en">The address changed or this page is no longer available.</p>
+      <p class="label">404</p>
+      <h1>페이지를 찾을 수 없습니다</h1>
+      <p>주소가 바뀌었거나, 아직 공개되지 않은 기록입니다.</p>
+      <p lang="en">The address may have changed, or the record is not published yet.</p>
       <nav aria-label="이동할 페이지">
-        <a href="/ko/">한국어 홈</a>
-        <a href="/en/" lang="en">English home</a>
-        <a href="/tokamak/ko/">Tokamak</a>
+        <a href="/ko/">한국어 홈 →</a>
+        <a href="/en/" lang="en">English home →</a>
+        <a href="/tokamak/ko/">Tokamak ↗</a>
       </nav>
     </main>
   </body>
