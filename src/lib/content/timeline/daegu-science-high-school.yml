@@ -1,0 +1,22 @@
+id: daegu-science-high-school
+kind: education
+editorialStatus: published
+period:
+  start: '2018'
+  end: '2020'
+sourceLocale: ko
+content:
+  ko:
+    title: 대구과학고등학교
+    role: 과학영재학교
+    location: 대구
+  en:
+    title: Daegu Science High School
+    role: Science-gifted school
+    location: Daegu
+projectIds: []
+outputIds: []
+knowledgeLinks: []
+evidence:
+  - kind: user-confirmed
+    checkedAt: 2026-08-01

@@ -76,7 +76,9 @@ const PersonContentSchema = z.object({
 
 const TimelineContentSchema = z.object({
   title: z.string().min(1),
-  summary: z.string().min(1),
+  // Optional: the home page hides it anyway, and a required summary just
+  // invites filler that repeats the title.
+  summary: z.string().min(1).optional(),
   role: z.string().min(1).optional(),
   organization: z.string().min(1).optional(),
   location: z.string().min(1).optional()

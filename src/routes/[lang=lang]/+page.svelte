@@ -83,7 +83,13 @@
   {#if data.now.length}
     <section class="section" aria-labelledby="now-title">
       <div class="section-head"><h2 class="label" id="now-title">{labels.now}</h2></div>
-      <TimelineList events={data.now} projects={data.allProjects} lang={data.lang} headingLevel={3} />
+      <TimelineList
+        events={data.now}
+        projects={data.allProjects}
+        lang={data.lang}
+        headingLevel={3}
+        showSummary={false}
+      />
     </section>
   {/if}
 
@@ -93,7 +99,13 @@
         <h2 class="label" id="experience-title">{labels.experience}</h2>
         <a class="more" href={localizedHref(data.lang, 'timeline')}>{labels.allTimeline} →</a>
       </div>
-      <TimelineList events={data.experience} projects={data.allProjects} lang={data.lang} headingLevel={3} />
+      <TimelineList
+        events={data.experience}
+        projects={data.allProjects}
+        lang={data.lang}
+        headingLevel={3}
+        showSummary={false}
+      />
     </section>
   {/if}
 

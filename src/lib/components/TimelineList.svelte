@@ -11,13 +11,15 @@
     projects = [],
     outputs = [],
     lang,
-    headingLevel = 2
+    headingLevel = 2,
+    showSummary = true
   }: {
     events: PublicTimelineEvent[];
     projects?: PublicProject[];
     outputs?: PublicOutput[];
     lang: Locale;
     headingLevel?: 2 | 3;
+    showSummary?: boolean;
   } = $props();
   const labels = $derived(ui[lang]);
   const headingTag = $derived(headingLevel === 2 ? 'h2' : 'h3');
@@ -38,12 +40,14 @@
         <svelte:element this={headingTag}>
           {event.content.title}{#if event.isFallback}<span class="lang-note">{event.locale.toUpperCase()}</span>{/if}
         </svelte:element>
-        {#if event.content.role || event.content.organization}
+        {#if event.content.role || event.content.organization || event.content.location}
           <p class="entry-byline">
             {[event.content.role, event.content.organization, event.content.location].filter(Boolean).join(' · ')}
           </p>
         {/if}
-        <p class="entry-summary">{event.content.summary}</p>
+        {#if showSummary && event.content.summary}
+          <p class="entry-summary">{event.content.summary}</p>
+        {/if}
         {#if relatedProjects.length || relatedOutputs.length}
           <ul class="inline-links">
             {#each relatedProjects as project}
