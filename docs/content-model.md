@@ -26,6 +26,9 @@ A collection file's name must equal the record's `id`.
 Dates are partial: `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`, and must be real calendar
 dates. A period's `end` may also be the literal `present`.
 
+Quote year-only dates — `start: '2024'`. Unquoted, YAML reads `2024` as an
+integer and validation fails. `2024-03` and `2024-03-01` need no quotes.
+
 ### Locale rules
 
 A record must always carry its `sourceLocale` block. When a page is requested in

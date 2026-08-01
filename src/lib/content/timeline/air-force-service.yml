@@ -1,0 +1,22 @@
+id: air-force-service
+kind: employment
+editorialStatus: published
+period:
+  start: '2022'
+  end: '2023'
+sourceLocale: ko
+content:
+  ko:
+    title: 공군작전사령부
+    role: 병역
+    organization: 대한민국 공군
+  en:
+    title: Air Force Operations Command
+    role: Mandatory military service
+    organization: Republic of Korea Air Force
+projectIds: []
+outputIds: []
+knowledgeLinks: []
+evidence:
+  - kind: user-confirmed
+    checkedAt: 2026-08-01

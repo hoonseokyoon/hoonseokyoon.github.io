@@ -1,0 +1,20 @@
+id: catholic-university-medicine
+kind: education
+editorialStatus: published
+period:
+  start: '2024'
+  end: present
+sourceLocale: ko
+content:
+  ko:
+    title: 가톨릭대학교 의과대학
+    location: 서울
+  en:
+    title: College of Medicine, The Catholic University of Korea
+    location: Seoul
+projectIds: []
+outputIds: []
+knowledgeLinks: []
+evidence:
+  - kind: user-confirmed
+    checkedAt: 2026-08-01

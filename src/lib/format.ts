@@ -27,10 +27,10 @@ export function tabularDate(value: string) {
 }
 
 export function tabularPeriod(period: { start: string; end?: string }, presentLabel: string) {
-  return {
-    start: tabularDate(period.start),
-    end: period.end === 'present' ? presentLabel : period.end ? tabularDate(period.end) : undefined
-  };
+  const start = tabularDate(period.start);
+  const end = period.end === 'present' ? presentLabel : period.end ? tabularDate(period.end) : undefined;
+  // A record that starts and ends in the same period reads as one date, not a range.
+  return { start, end: end === start ? undefined : end };
 }
 
 export function formatPeriod(period: { start: string; end?: string }, lang: Locale, presentLabel: string) {

@@ -1,0 +1,22 @@
+id: snu-industrial-engineering
+kind: education
+editorialStatus: published
+period:
+  start: '2021'
+  end: '2021'
+sourceLocale: ko
+content:
+  ko:
+    title: 서울대학교 산업공학과
+    location: 서울
+    summary: 1년간 수학한 뒤 진로를 의학으로 옮겼습니다.
+  en:
+    title: Department of Industrial Engineering, Seoul National University
+    location: Seoul
+    summary: Studied for a year before moving toward medicine.
+projectIds: []
+outputIds: []
+knowledgeLinks: []
+evidence:
+  - kind: user-confirmed
+    checkedAt: 2026-08-01
